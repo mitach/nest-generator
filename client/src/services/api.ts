@@ -13,7 +13,7 @@ export class ProjectGeneratorAPI {
 
     // Use environment variable if available, otherwise fallback to localhost
     this.baseUrl =
-      baseUrl || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      baseUrl || process.env.NEXT_PUBLIC_API_URL || "https://nest-generator-backend-560247957398.europe-west1.run.app";
 
       console.log('Final baseUrl:', this.baseUrl);
   }
