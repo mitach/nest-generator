@@ -1,0 +1,9 @@
+{
+  "updateAppModule": true,
+  "copyFiles": [
+    {
+      "source": "database.module.ts",
+      "target": "src/database/database.module.ts"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+// <!-- AUTH_IMPORTS -->
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './jwt/jwt.strategy';
+import { JwtAuthController } from './jwt/jwt-auth.controller';
+import { JwtAuthService } from './jwt/jwt-auth.service';
+// <!-- AUTH_MODULES -->
+JwtModule.registerAsync({
+  imports: [ConfigModule],
+  useFactory: (config: ConfigService) => ({
+    secret: config.get('JWT_SECRET'),
+    signOptions: { expiresIn: config.get('JWT_EXPIRATION') || '15m' },
+  }),
+  inject: [ConfigService],
+}),
+// <!-- AUTH_PROVIDERS -->
+JwtStrategy, JwtAuthService,
+// <!-- AUTH_CONTROLLERS -->
+JwtAuthController,

@@ -1,0 +1,35 @@
+{
+    "copyFiles": [
+        {
+            "source": "users.controller.ts",
+            "target": "../api-gateway/src/controllers/users.controller.ts"
+        }
+    ],
+    "partialFiles": {
+        "../api-gateway/src/app.module.ts": {
+            "target": "../api-gateway/src/app.module.ts",
+            "source": "partials/api-gateway/api-gateway.app.module.ts.partial",
+            "placeholders": [
+                "MODULE_IMPORTS",
+                "CLIENTS_MODULE_REGISTER",
+                "MODULE_CONTROLLERS"
+            ]
+        },
+        "src/app.service.ts": {
+            "target": "src/app.service.ts",
+            "source": "partials/users-service/app.service.ts.partial",
+            "placeholders": [
+                "SERVICE_METHODS"
+            ]
+        },
+        "src/app.controller.ts": {
+            "target": "src/app.controller.ts",
+            "source": "partials/users-service/app.controller.ts.partial",
+            "placeholders": [
+                "CONTROLLER_IMPORTS",
+                "CONTROLLER_CONSTRUCTOR_PROPS",
+                "CONTROLLER_METHODS"
+            ]
+        }
+    }
+}

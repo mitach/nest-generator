@@ -1,0 +1,61 @@
+{
+    "dependencies": {
+        "@nestjs/jwt": "^11.0.0",
+        "passport-jwt": "^4.0.1"
+    },
+    "devDependencies": {
+        "@types/passport-jwt": "^4.0.1"
+    },
+    "requires": [
+        "auth"
+    ],
+    "copyFiles": [
+        {
+            "source": "jwt.strategy.ts",
+            "target": "src/jwt/jwt.strategy.ts"
+        },
+        {
+            "source": "jwt-auth.controller.ts",
+            "target": "src/jwt/jwt-auth.controller.ts"
+        },
+        {
+            "source": "jwt-auth.service.ts",
+            "target": "src/jwt/jwt-auth.service.ts"
+        },
+        {
+            "source": "jwt-payload.interface.ts",
+            "target": "src/jwt/jwt-payload.interface.ts"
+        },
+        {
+            "source": "refresh-token.guard.ts",
+            "target": "src/jwt/refresh-token.guard.ts"
+        },
+        {
+            "source": "dto/login.dto.ts",
+            "target": "src/jwt/dto/login.dto.ts"
+        },
+        {
+            "source": "dto/register.dto.ts",
+            "target": "src/jwt/dto/register.dto.ts"
+        }
+    ],
+    "partialFiles": {
+        ".env": {
+            "target": ".env",
+            "source": "partials/env.partial",
+            "placeholders": [
+                "AUTH_ENV"
+            ]
+        },
+        "src/app.module.ts": {
+            "target": "src/app.module.ts",
+            "source": "partials/app.module.partial",
+            "placeholders": [
+                "MODULE_IMPORTS",
+                "MODULES",
+                "CONTROLLERS",
+                "PROVIDERS"
+            ]
+        }
+    }
+}

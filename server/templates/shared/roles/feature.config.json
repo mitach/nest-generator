@@ -1,0 +1,82 @@
+{
+    "partialFiles": {
+        "user.entity.ts": {
+            "source": "partials/users/user.entity.partial",
+            "target": "src/users/entities/user.entity.ts",
+            "placeholders": [
+                "IMPORTS",
+                "COLUMNS"
+            ]
+        },
+        "user.schema.ts": {
+            "source": "partials/users/user.schema.partial",
+            "target": "src/users/schemas/user.schema.ts",
+            "placeholders": [
+                "IMPORTS",
+                "PROPS"
+            ]
+        },
+        "auth.controller.ts": {
+            "source": "partials/auth/auth.controller.partial",
+            "target": "src/auth/auth.controller.ts",
+            "placeholders": [
+                "IMPORTS",
+                "ENDPOINTS_LOGIC"
+            ]
+        },
+        "jwt-auth.service.ts": {
+            "source": "partials/auth/jwt-auth.service.partial",
+            "target": "src/auth/jwt/jwt-auth.service.ts",
+            "placeholders": [
+                "GENERATE_TOKENS_REGISTER",
+                "GENERATE_TOKENS_LOGIN",
+                "GENERATE_TOKENS_REFRESH"
+            ],
+            "onlyIfFeatures": [
+                "auth:jwt"
+            ]
+        },
+        "jwt-payload.interface.ts": {
+            "source": "partials/auth/jwt-payload.interface.partial",
+            "target": "src/auth/jwt/jwt-payload.interface.ts",
+            "placeholders": [
+                "PROPS"
+            ],
+            "onlyIfFeatures": [
+                "auth:jwt"
+            ]
+        },
+        "jwt.strategy.ts": {
+            "source": "partials/auth/jwt.strategy.partial",
+            "target": "src/auth/jwt/jwt.strategy.ts",
+            "placeholders": [
+                "PROPS"
+            ],
+            "onlyIfFeatures": [
+                "auth:jwt"
+            ]
+        },
+        "auth.service.ts": {
+            "source": "partials/auth/auth.service.partial",
+            "target": "src/auth/auth.service.ts",
+            "placeholders": [
+                "PAYLOAD_PROPS",
+                "ACCESS_TOKEN_PROPS",
+                "REFRESH_TOKEN_PROPS"
+            ],
+            "onlyIfFeatures": [
+                "auth:jwt"
+            ]
+        }
+    },
+    "copyFiles": [
+        {
+            "source": "roles.guard.ts",
+            "target": "src/common/guards/roles.guard.ts"
+        },
+        {
+            "source": "roles.decorator.ts",
+            "target": "src/common/decorators/roles.decorator.ts"
+        }
+    ]
+}

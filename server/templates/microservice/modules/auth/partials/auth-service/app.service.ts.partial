@@ -1,0 +1,12 @@
+// <!-- SERVICE_IMPORTS -->
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+
+// <!-- SERVICE_METHODS -->
+async hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 10);
+}
+
+async comparePasswords(password: string, hash: string): Promise<boolean> {
+    return bcrypt.compare(password, hash);
+}

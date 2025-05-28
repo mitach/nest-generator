@@ -1,0 +1,5 @@
+// <!-- MODULE_IMPORTS -->
+import { MongooseModule } from '@nestjs/mongoose';
+import { User, UserSchema } from './schemas/user.schema';
+// <!-- MODULES -->
+MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),

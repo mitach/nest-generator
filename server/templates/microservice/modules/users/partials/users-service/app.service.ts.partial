@@ -1,0 +1,9 @@
+// <!-- SERVICE_METHODS -->
+async findByEmail(email: string): Promise<any> {
+    // <!-- USER_FIND -->
+    return null;
+}
+async createUser(data: { email: string; password?: string }): Promise<any> {
+    // <!-- USER_CREATE -->
+    return null;
+}

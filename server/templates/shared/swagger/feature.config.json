@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@nestjs/swagger": "^11.1.6",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "partialFiles": {
+    "main.ts": {
+      "source": "main.ts.partial",
+      "target": "src/main.ts",
+      "placeholders": ["IMPORTS_PLACEHOLDER", "MIDDLEWARE_PLACEHOLDER"]
+    }
+  }
+} 

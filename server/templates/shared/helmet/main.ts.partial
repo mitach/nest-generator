@@ -1,0 +1,5 @@
+// <!-- IMPORTS_PLACEHOLDER -->
+import helmet from 'helmet';
+
+// <!-- MIDDLEWARE_PLACEHOLDER -->
+app.use(helmet()); 

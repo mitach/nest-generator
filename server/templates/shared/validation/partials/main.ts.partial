@@ -1,0 +1,4 @@
+// <!-- IMPORTS_PLACEHOLDER -->
+import { ValidationPipe } from '@nestjs/common';
+// <!-- MIDDLEWARE_PLACEHOLDER -->
+app.useGlobalPipes(new ValidationPipe());

@@ -1,0 +1,17 @@
+// <!-- CONTROLLER_IMPORTS -->
+import { MessagePattern } from '@nestjs/microservices';
+import { AppService } from './app.service';
+
+// <!-- CONTROLLER_CONSTRUCTOR_PROPS -->
+private readonly appService: AppService,
+
+// <!-- CONTROLLER_METHODS -->
+@MessagePattern('user.findByEmail')
+async findByEmail({ email }: { email: string }) {
+    return this.appService.findByEmail(email);
+}
+
+@MessagePattern('user.create')
+async createUser({ email, password }: { email: string; password: string }) {
+    return this.appService.createUser({ email, password });
+}

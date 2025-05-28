@@ -1,0 +1,17 @@
+// <!-- CONTROLLER_IMPORTS -->
+import { MessagePattern } from '@nestjs/microservices';
+import { AppService } from './app.service';
+
+// <!-- CONTROLLER_CONSTRUCTOR_PROPS -->
+private readonly appService: AppService,
+
+// <!-- CONTROLLER_METHODS -->
+@MessagePattern('auth.hashPassword')
+async hashPassword({ password }: { password: string }) {
+    return this.appService.hashPassword(password);
+}
+
+@MessagePattern('auth.comparePasswords')
+async comparePasswords({ password, hash }: { password: string; hash: string }) {
+    return this.appService.comparePasswords(password, hash);
+}

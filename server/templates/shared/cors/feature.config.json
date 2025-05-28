@@ -1,0 +1,11 @@
+{
+    "partialFiles": {
+        "src/main.ts": {
+            "target": "src/main.ts",
+            "source": "main.ts.partial",
+            "placeholders": [
+                "MIDDLEWARE_PLACEHOLDER"
+            ]
+        }
+    }
+}

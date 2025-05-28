@@ -1,0 +1,15 @@
+// <!-- MODULE_IMPORTS -->
+import { UsersController } from './controllers/users.controller';
+
+// <!-- CLIENTS_MODULE_REGISTER -->
+{
+    name: 'USERS_SERVICE',
+    transport: Transport.TCP,
+    options: {
+        host: 'localhost',
+        port: 3002,
+    },
+},
+
+// <!-- MODULE_CONTROLLERS -->
+UsersController,

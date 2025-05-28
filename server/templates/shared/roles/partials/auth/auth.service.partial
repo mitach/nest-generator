@@ -1,0 +1,6 @@
+// <!-- PAYLOAD_PROPS -->
+roles: string[]
+// <!-- ACCESS_TOKEN_PROPS -->
+roles: payload.roles
+// <!-- REFRESH_TOKEN_PROPS -->
+roles: payload.roles

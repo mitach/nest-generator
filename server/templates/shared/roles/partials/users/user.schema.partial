@@ -1,0 +1,3 @@
+// <!-- PROPS -->
+@Prop({ type: [String], default: ['user'] })
+roles: string[];

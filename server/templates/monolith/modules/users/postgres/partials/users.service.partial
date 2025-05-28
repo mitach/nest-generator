@@ -1,0 +1,13 @@
+// <!-- USER_IMPORTS -->
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+
+// <!-- USER_CONSTRUCTOR_ARGS -->
+@InjectRepository(User) private readonly userRepo: Repository<User>,
+
+// <!-- USER_FIND -->
+return this.userRepo.findOne({ where: { email } });
+
+// <!-- USER_CREATE -->
+return this.userRepo.save(data);

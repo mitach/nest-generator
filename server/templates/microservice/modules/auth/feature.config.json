@@ -1,0 +1,44 @@
+{
+    "dependencies": {
+        "@nestjs/passport": "^11.0.5",
+        "passport": "^0.7.0",
+        "bcrypt": "^5.1.1"
+    },
+    "devDependencies": {
+        "@types/bcrypt": "^5.0.2"
+    },
+    "copyFiles": [
+        {
+            "source": "auth.controller.ts",
+            "target": "../api-gateway/src/controllers/auth.controller.ts"
+        }
+    ],
+    "partialFiles": {
+        "../api-gateway/src/app.module.ts": {
+            "target": "../api-gateway/src/app.module.ts",
+            "source": "partials/api-gateway/api-gateway.app.module.ts.partial",
+            "placeholders": [
+                "MODULE_IMPORTS",
+                "CLIENTS_MODULE_REGISTER",
+                "MODULE_CONTROLLERS"
+            ]
+        },
+        "src/app.controller.ts": {
+            "target": "src/app.controller.ts",
+            "source": "partials/auth-service/app.controller.ts.partial",
+            "placeholders": [
+                "CONTROLLER_IMPORTS",
+                "CONTROLLER_CONSTRUCTOR_PROPS",
+                "CONTROLLER_METHODS"
+            ]
+        },
+        "src/app.service.ts": {
+            "target": "src/app.service.ts",
+            "source": "partials/auth-service/app.service.ts.partial",
+            "placeholders": [
+                "SERVICE_IMPORTS",
+                "SERVICE_METHODS"
+            ]
+        }
+    }
+}

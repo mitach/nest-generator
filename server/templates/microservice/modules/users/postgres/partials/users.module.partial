@@ -1,0 +1,5 @@
+// <!-- MODULE_IMPORTS -->
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+// <!-- MODULES -->
+TypeOrmModule.forFeature([User]),
