@@ -1,7 +1,7 @@
 # Next.js Client Dockerfile  
 # Place this file in your /client directory
 
-FROM node:18-alpine
+FROM node:23-alpine
 
 WORKDIR /app
 
