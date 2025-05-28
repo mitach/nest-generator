@@ -4,7 +4,6 @@ import { FeatureSection } from '../ui/FeatureSection';
 import { ServiceTemplateButtons } from '../ui/ServiceTemplateButtons';
 import {
   MICROSERVICE_TEMPLATES,
-  FEATURE_CATEGORIES,
   getAllowedCategoriesForService,
   getFeaturesByCategory
 } from '../../constants/features';

@@ -8,7 +8,7 @@ import { ProjectGeneratorAPI } from '../services/api';
 import { ArchitectureSelector } from './ui/ArchitectureSelector';
 import { MonolithFeatures } from './features/MonolithFeatures';
 import { MicroserviceFeatures } from './features/MicroserviceFeatures';
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const api = new ProjectGeneratorAPI();
 
 export const ProjectGenerator: React.FC = () => {

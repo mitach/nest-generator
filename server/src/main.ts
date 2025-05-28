@@ -7,7 +7,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3000', // for local development
-      process.env.FRONTEND_URL || 'http://localhost:3000', // production frontend URL
+      process.env.FRONTEND_URL || 'https://nest-generator-client-560247957398.europe-west1.run.app', // production frontend URL
     ],
     credentials: false,
   });
