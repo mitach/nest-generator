@@ -3,8 +3,11 @@ import { ProjectConfig } from "@/types/project";
 export class ProjectGeneratorAPI {
   private baseUrl: string;
 
-  constructor(baseUrl = 'http://localhost:5000') {
-    this.baseUrl = baseUrl;
+  constructor(baseUrl?: string) {
+    // Use environment variable if available, otherwise fallback to localhost
+    this.baseUrl = baseUrl || 
+                   process.env.NEXT_PUBLIC_API_URL || 
+                   'http://localhost:5000';
   }
 
   async generateProject(config: ProjectConfig): Promise<{ generationId: string }> {
