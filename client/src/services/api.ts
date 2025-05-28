@@ -10,10 +10,12 @@ export class ProjectGeneratorAPI {
       process.env.NEXT_PUBLIC_API_URL
     );
     console.log("Passed baseUrl:", baseUrl);
-    
+
     // Use environment variable if available, otherwise fallback to localhost
     this.baseUrl =
       baseUrl || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+      console.log('Final baseUrl:', this.baseUrl);
   }
 
   async generateProject(
