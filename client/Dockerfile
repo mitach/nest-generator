@@ -5,6 +5,10 @@ FROM node:23-alpine
 
 WORKDIR /app
 
+# Accept build-time variable
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
 # Copy package files first for better caching
 COPY package*.json ./
 
