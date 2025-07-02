@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+printf "Running pre-commit checks...\n"
+
+# Run lint-staged for staged files only
+npx lint-staged
+
+printf "✅ Pre-commit checks completed!\n"

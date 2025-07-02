@@ -1,0 +1,19 @@
+{
+  "extends": ["next/core-web-vitals"],
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.js", "**/*.test.ts", "**/*.spec.js", "**/*.spec.ts", "jest.setup.js"],
+      "env": {
+        "jest": true
+      },
+      "globals": {
+        "jest": "readonly"
+      }
+    }
+  ]
+}

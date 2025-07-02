@@ -1,7 +1,7 @@
 // <!-- AUTH_IMPORTS -->
-import { GoogleAuthController } from './google/google-auth.controller';
-import { GoogleStrategy } from './google/google.strategy';
-import { GoogleAuthService } from './google/google-auth.service';
+import { GoogleAuthController } from './controllers/google-auth.controller';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { GoogleAuthService } from './services/google-auth.service';
 // <!-- AUTH_PROVIDERS -->
 GoogleStrategy, GoogleAuthService,
 // <!-- AUTH_CONTROLLERS -->

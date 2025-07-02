@@ -1,23 +1,15 @@
 {
-  "dependencies": {
-    "@nestjs/mongoose": "^11.0.0",
-    "mongoose": "^7.3.4"
-  },
+  "dependencyPresets": ["mongodb-setup"],
   "partialFiles": {
     ".env": {
       "target": ".env",
       "source": "partials/env.partial",
-      "placeholders": [
-        "DB_ENV"
-      ]
+      "placeholders": ["DB_ENV"]
     },
     "src/database/database.module.ts": {
       "target": "src/database/database.module.ts",
       "source": "partials/database.module.partial",
-      "placeholders": [
-        "DB_MODULE_IMPORT",
-        "DB_MODULE"
-      ]
+      "placeholders": ["DB_MODULE_IMPORT", "DB_MODULE"]
     }
   }
 }

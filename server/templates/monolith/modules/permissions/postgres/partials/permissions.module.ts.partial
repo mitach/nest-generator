@@ -1,0 +1,6 @@
+// <!-- PERMISSIONS_IMPORTS -->
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Permission } from './entities/permission.entity';
+
+// <!-- PERMISSIONS_MODULES -->
+TypeOrmModule.forFeature([Permission])

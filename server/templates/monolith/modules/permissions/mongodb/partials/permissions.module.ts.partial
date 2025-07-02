@@ -1,0 +1,6 @@
+// <!-- PERMISSIONS_IMPORTS -->
+import { MongooseModule } from '@nestjs/mongoose';
+import { Permission, PermissionSchema } from './schemas/permission.schema';
+
+// <!-- PERMISSIONS_MODULES -->
+MongooseModule.forFeature([{ name: Permission.name, schema: PermissionSchema }]),

@@ -1,0 +1,112 @@
+// <!-- IMPORTS_PLACEHOLDER -->
+import helmet from 'helmet';
+
+// <!-- MIDDLEWARE_PLACEHOLDER -->
+{{#if helmetOptions}}
+  app.use(helmet({
+    {{#each helmetOptions}}
+      {{#if (eq @key "contentSecurityPolicy")}}
+        contentSecurityPolicy: {{#if this}}{
+          directives: {
+            {{#each this.directives}}
+              {{@key}}: [
+                  {{#each this}}
+                    {{{quotedValue this}}}{{#unless @last}}, {{/unless}}
+                  {{/each}}
+              ]{{#unless @last}},{{/unless}}
+            {{/each}}
+          }
+        }
+        {{else}}
+          false
+        {{/if}},
+      {{else if (eq @key "hsts")}}
+        hsts: {{#if this}}{
+          maxAge: {{this.maxAge}},
+          includeSubDomains: {{this.includeSubDomains}},
+          preload: {{this.preload}}
+        }
+        {{else}}
+          false
+        {{/if}},
+      {{else if (eq @key "permissionsPolicy")}}
+        permissionsPolicy: {{#if this}}{
+          {{#each this}}
+            {{@key}}: [
+              {{#each this}}
+                {{{quotedValue this}}}{{#unless @last}}, {{/unless}}
+              {{/each}}
+            ]
+            {{#unless @last}},{{/unless}}
+          {{/each}}
+        }
+        {{else}}
+          false
+        {{/if}},
+      {{else if (eq @key "xFrameOptions")}}
+        xFrameOptions: 
+          {{#if (eq this false)}}
+            false
+          {{else if (eq this "DENY")}}
+            { action: 'deny' }
+          {{else if (eq this "SAMEORIGIN")}}
+            { action: 'sameorigin' }
+          {{else}}
+            false
+          {{/if}},
+      {{else if (eq @key "referrerPolicy")}}
+        referrerPolicy: 
+          {{#if (eq this false)}}
+            false
+          {{else}}
+            { policy: {{{quotedValue this}}} }
+          {{/if}},
+      {{else if (eq @key "xPermittedCrossDomainPolicies")}}
+        xPermittedCrossDomainPolicies: 
+          {{#if (eq this false)}}
+            false
+          {{else}}
+            { permittedPolicies: {{{quotedValue this}}} }
+          {{/if}},
+      {{else if (eq @key "crossOriginEmbedderPolicy")}}
+        crossOriginEmbedderPolicy: 
+          {{#if (eq this false)}}
+            false
+          {{else}}
+            { policy: {{{quotedValue this}}} }
+          {{/if}},
+      {{else if (eq @key "crossOriginOpenerPolicy")}}
+        crossOriginOpenerPolicy: 
+          {{#if (eq this false)}}
+            false
+          {{else}}
+            { policy: {{{quotedValue this}}} }
+          {{/if}},
+      {{else if (eq @key "crossOriginResourcePolicy")}}
+        crossOriginResourcePolicy: 
+          {{#if (eq this false)}}
+            false
+          {{else}}
+            { policy: {{{quotedValue this}}} }
+          {{/if}},
+      {{else}}
+        {{@key}}:
+          {{#if (eq this false)}}
+            false
+          {{else if (isArray this)}}
+            [
+              {{#each this}}
+                {{{quotedValue this}}}{{#unless @last}}, {{/unless}}
+              {{/each}}
+            ]
+          {{else if (isString this)}}
+            {{{quotedValue this}}}
+          {{else}}
+            {{this}}
+          {{/if}},
+      {{/if}}
+    {{/each}}
+}));
+{{else}}
+app.use(helmet());
+{{/if}}

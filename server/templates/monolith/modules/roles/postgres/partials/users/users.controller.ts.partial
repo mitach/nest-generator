@@ -1,0 +1,12 @@
+// <!-- USERS_CONTROLLER_IMPORTS -->
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+// <!-- USERS_CONTROLLER_METHODS -->
+@Get()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
+findAll() {
+    return this.usersService.findAll();
+}

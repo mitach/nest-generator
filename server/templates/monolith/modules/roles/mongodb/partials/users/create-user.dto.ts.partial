@@ -1,0 +1,5 @@
+// <!-- USER_DTO_IMPORTS -->
+import { Role } from '../../roles/schemas/role.schema';
+
+// <!-- USER_DTO_PROPS -->
+roles?: Role[];

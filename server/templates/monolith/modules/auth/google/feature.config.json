@@ -1,42 +1,29 @@
 {
-    "dependencies": {
-        "@nestjs/passport": "^11.0.5",
-        "passport": "^0.7.0",
-        "passport-google-oauth20": "^2.0.0"
+  "dependencyPresets": ["google-auth"],
+  "copyFiles": [
+    {
+      "source": "google.strategy.ts",
+      "target": "src/auth/strategies/google.strategy.ts"
     },
-    "devDependencies": {
-        "@types/passport-google-oauth20": "^2.0.16"
+    {
+      "source": "google-auth.controller.ts",
+      "target": "src/auth/controllers/google-auth.controller.ts"
     },
-    "copyFiles": [
-        {
-            "source": "google.strategy.ts",
-            "target": "src/auth/google/google.strategy.ts"
-        },
-        {
-            "source": "google-auth.controller.ts",
-            "target": "src/auth/google/google-auth.controller.ts"
-        },
-        {
-            "source": "google-auth.service.ts",
-            "target": "src/auth/google/google-auth.service.ts"
-        }
-    ],
-    "partialFiles": {
-        ".env": {
-            "target": ".env",
-            "source": "partials/env.partial",
-            "placeholders": [
-                "AUTH_ENV"
-            ]
-        },
-        "src/auth/auth.module.ts": {
-            "target": "src/auth/auth.module.ts",
-            "source": "partials/auth.module.partial",
-            "placeholders": [
-                "AUTH_IMPORTS",
-                "AUTH_PROVIDERS",
-                "AUTH_CONTROLLERS"
-            ]
-        }
+    {
+      "source": "google-auth.service.ts",
+      "target": "src/auth/services/google-auth.service.ts"
     }
+  ],
+  "partialFiles": {
+    ".env": {
+      "target": ".env",
+      "source": "partials/env.partial",
+      "placeholders": ["AUTH_ENV"]
+    },
+    "src/auth/auth.module.ts": {
+      "target": "src/auth/auth.module.ts",
+      "source": "partials/auth.module.partial",
+      "placeholders": ["AUTH_IMPORTS", "AUTH_PROVIDERS", "AUTH_CONTROLLERS"]
+    }
+  }
 }

@@ -8,7 +8,7 @@ import { ProjectGeneratorStrategy } from '../strategies/project-generator.interf
 export class GenerationService {
   constructor(
     private readonly monolithStrategy: MonolithStrategy,
-    private readonly microserviceStrategy: MicroserviceStrategy
+    private readonly microserviceStrategy: MicroserviceStrategy,
   ) {}
 
   async generateProject(data: GenerateProjectDto): Promise<Buffer> {

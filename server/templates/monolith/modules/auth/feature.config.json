@@ -1,16 +1,7 @@
 {
+  "dependencyGroups": ["auth"],
   "updateAppModule": true,
-  "dependencies": {
-    "@nestjs/passport": "^11.0.5",
-    "passport": "^0.7.0",
-    "bcrypt": "^5.1.1"
-  },
-  "devDependencies": {
-    "@types/bcrypt": "^5.0.2"
-  },
-  "requires": [
-    "users"
-  ],
+  "requires": ["users"],
   "copyFiles": [
     {
       "source": "auth.module.ts",
@@ -18,11 +9,11 @@
     },
     {
       "source": "auth.service.ts",
-      "target": "src/auth/auth.service.ts"
+      "target": "src/auth/services/auth.service.ts"
     },
     {
       "source": "auth.controller.ts",
-      "target": "src/auth/auth.controller.ts"
+      "target": "src/auth/controllers/auth.controller.ts"
     }
   ]
 }

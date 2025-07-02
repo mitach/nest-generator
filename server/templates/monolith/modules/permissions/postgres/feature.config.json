@@ -1,0 +1,33 @@
+{
+  "copyFiles": [
+    {
+      "source": "entities/permission.entity.ts",
+      "target": "src/permissions/entities/permission.entity.ts"
+    },
+    {
+      "source": "common/interfaces/request-with-user.interface.ts",
+      "target": "src/common/interfaces/request-with-user.interface.ts"
+    }
+  ],
+  "partialFiles": {
+    "user.entity.ts": {
+      "source": "partials/users/user.entity.partial",
+      "target": "src/users/entities/user.entity.ts",
+      "placeholders": ["IMPORTS", "COLUMNS"]
+    },
+    "permissions.service.ts": {
+      "source": "partials/permissions.service.ts.partial",
+      "target": "src/permissions/permissions.service.ts",
+      "placeholders": [
+        "PERMISSIONS_IMPORTS",
+        "PERMISSIONS_CONSTRUCTOR_ARGS",
+        "PERMISSIONS_SERVICE_METHODS"
+      ]
+    },
+    "permissions.module.ts": {
+      "source": "partials/permissions.module.ts.partial",
+      "target": "src/permissions/permissions.module.ts",
+      "placeholders": ["PERMISSIONS_IMPORTS", "PERMISSIONS_MODULES"]
+    }
+  }
+}

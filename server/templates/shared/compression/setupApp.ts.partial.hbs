@@ -1,0 +1,19 @@
+// <!-- IMPORTS_PLACEHOLDER -->
+import * as compression from 'compression';
+
+// <!-- MIDDLEWARE_PLACEHOLDER -->
+{{#if compressionOptions}}
+  app.use(compression({
+  {{#if (isDefined compressionOptions.level)}}
+    level: {{compressionOptions.level}},
+  {{/if}}
+  {{#if compressionOptions.threshold}}
+    threshold: {{compressionOptions.threshold}},
+  {{/if}}
+  {{#if compressionOptions.chunkSize}}
+    chunkSize: {{compressionOptions.chunkSize}},
+  {{/if}}
+  }));
+{{else}}
+app.use(compression());
+{{/if}}

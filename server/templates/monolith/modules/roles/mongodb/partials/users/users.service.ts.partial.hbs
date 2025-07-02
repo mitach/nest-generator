@@ -1,0 +1,43 @@
+// <!-- USER_IMPORTS -->
+import { UpdateUserDto } from './dto/update-user.dto';
+import { Types } from 'mongoose';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+
+// <!-- USERS_SERVICE_METHODS -->
+async findAll(): Promise<User[]> {
+    return this.userModel.find().populate('roles').exec();
+}
+
+async update(userId: string, updateUserDto: UpdateUserDto): Promise<User> {
+    if (!Types.ObjectId.isValid(userId)) {
+        throw new BadRequestException('Invalid user ID');
+    }
+
+    // Check email conflict if email is being updated
+    if (updateUserDto.email) {
+        const existingUser = await this.userModel.findOne({
+            email: updateUserDto.email,
+            _id: { $ne: userId },
+        });
+        if (existingUser) {
+            throw new ConflictException('Email already in use');
+        }
+    }
+
+    const updatedUser = await this.userModel
+        .findByIdAndUpdate(userId, updateUserDto, { new: true })
+        .select('-password')
+        {{#if (includes allFeatures 'roles:mongodb')}}
+            .populate('roles', 'name')
+        {{/if}}
+        {{#if (includes allFeatures 'permissions:mongodb')}}
+            .populate('permissions', 'name')
+        {{/if}}
+        .exec();
+
+    if (!updatedUser) {
+        throw new NotFoundException('User not found');
+    }
+
+    return updatedUser;
+}

@@ -1,11 +1,9 @@
 {
-    "partialFiles": {
-        "src/main.ts": {
-            "target": "src/main.ts",
-            "source": "main.ts.partial",
-            "placeholders": [
-                "MIDDLEWARE_PLACEHOLDER"
-            ]
-        }
+  "partialFiles": {
+    "src/main.ts": {
+      "source": "setupApp.ts.partial.hbs",
+      "target": "src/setupApp.ts",
+      "placeholders": ["MIDDLEWARE_PLACEHOLDER"]
     }
+  }
 }

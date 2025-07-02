@@ -1,0 +1,32 @@
+{{#if (includes allFeatures 'validation')}}
+import { IsEmail, IsString, IsNotEmpty } from 'class-validator';
+{{/if}}
+{{#if (includes allFeatures 'swagger')}}
+import { ApiProperty } from '@nestjs/swagger';
+{{/if}}
+
+
+export class LoginDto {
+    {{#if (includes allFeatures 'swagger')}}
+        @ApiProperty({
+            description: 'User email address',
+            example: 'user@example.com',
+        })
+    {{/if}}
+    {{#if (includes allFeatures 'validation')}}
+        @IsEmail()
+    {{/if}}
+    email: string;
+
+    {{#if (includes allFeatures 'swagger')}}
+        @ApiProperty({
+            description: 'User password',
+            example: 'securePassword123',
+        })
+    {{/if}}
+    {{#if (includes allFeatures 'validation')}}
+        @IsString()
+        @IsNotEmpty()
+    {{/if}}
+    password: string;
+}

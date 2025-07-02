@@ -1,0 +1,156 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+printf "🚀 Running pre-push checks...\n"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Function for colored output
+print_color() {
+    color="$1"
+    message="$2"
+    printf "%b%s%b\n" "$color" "$message" "$NC"
+}
+
+# Get current branch and commit info
+branch=$(git rev-parse --abbrev-ref HEAD)
+commits_ahead=$(git rev-list --count '@{u}..HEAD' 2>/dev/null || echo "0")
+print_color "$BLUE" "📋 Branch: $branch ($commits_ahead commits ahead)"
+
+# Skip checks for specific patterns
+skip_branches="^(experimental|draft|wip|poc)/.|^(dependabot|renovate)/."
+if echo "$branch" | grep -qE "$skip_branches"; then
+  print_color "$YELLOW" "⚠️  Skipping pre-push checks for branch pattern: $branch"
+  exit 0
+fi
+
+# Skip if environment variable is set (CI bypass)
+if [ "$SKIP_PRE_PUSH" = "1" ]; then
+  print_color "$YELLOW" "⚠️  Skipping pre-push checks (SKIP_PRE_PUSH=1)"
+  exit 0
+fi
+
+# Check for uncommitted changes
+if ! git diff-index --quiet HEAD --; then
+  print_color "$RED" "❌ You have uncommitted changes. Please commit them before pushing."
+  print_color "$BLUE" "💡 Run: git add . && git commit -m 'fix: address uncommitted changes'"
+  exit 1
+fi
+
+# Lint check (excluding templates)
+printf "\n"
+print_color "$BLUE" "🔍 Running ESLint checks (excluding templates)..."
+if npm run lint 2>/dev/null; then
+  print_color "$GREEN" "✅ ESLint checks passed"
+else
+  print_color "$RED" "❌ ESLint errors found"
+  print_color "$BLUE" "💡 Run: npm run lint:fix"
+  exit 1
+fi
+
+# TypeScript check (incremental for performance)
+printf "\n"
+print_color "$BLUE" "🔷 Running TypeScript checks (incremental)..."
+if npm run type-check:incremental 2>/dev/null || npm run type-check; then
+  print_color "$GREEN" "✅ TypeScript checks passed"
+else
+  print_color "$RED" "❌ TypeScript errors found. Fix them before pushing."
+  print_color "$BLUE" "💡 Run: npm run lint:fix && npm run type-check"
+  exit 1
+fi
+
+# Check if templates were modified (warning only)
+printf "\n"
+print_color "$BLUE" "🎨 Checking template files..."
+templates_changed=$(git diff --name-only "HEAD~${commits_ahead}" HEAD | grep "server/templates/" || true)
+if [ -n "$templates_changed" ]; then
+  print_color "$YELLOW" "⚠️  Template files were modified:"
+  echo "$templates_changed" | sed 's/^/    /'
+  print_color "$BLUE" "💡 Make sure template changes don't break code generation"
+fi
+
+# SMART TESTING: Only run tests if available and relevant files changed
+printf "\n"
+test_files_changed=$(git diff --name-only "HEAD~${commits_ahead}" HEAD | grep -E '\.(test|spec)\.(ts|js|tsx|jsx)$' || true)
+src_files_changed=$(git diff --name-only "HEAD~${commits_ahead}" HEAD | grep -E '^(client|server)/src/.*\.(ts|js|tsx|jsx)$' || true)
+is_protected_branch=$(echo "$branch" | grep -E '^(main|master|develop|release/.*)$' || true)
+
+# Check if test scripts exist
+client_has_tests=$(cd client 2>/dev/null && npm run 2>/dev/null | grep -q "test" && echo "true" || echo "false")
+server_has_tests=$(cd server 2>/dev/null && npm run 2>/dev/null | grep -q "test" && echo "true" || echo "false")
+
+if [ "$client_has_tests" = "true" ] || [ "$server_has_tests" = "true" ]; then
+  if [ -n "$test_files_changed" ] || [ -n "$src_files_changed" ] || [ -n "$is_protected_branch" ]; then
+    print_color "$BLUE" "🧪 Running tests..."
+
+    # Use quick tests by default, full tests for protected branches or if RUN_ALL_TESTS=1
+    if [ -n "$is_protected_branch" ] || [ "$RUN_ALL_TESTS" = "1" ]; then
+      print_color "$BLUE" "🔍 Running full test suite (protected branch or RUN_ALL_TESTS=1)"
+      if npm run test 2>/dev/null; then
+        print_color "$GREEN" "✅ All tests passed"
+      else
+        print_color "$YELLOW" "⚠️  Tests failed or not configured properly"
+        print_color "$BLUE" "💡 Configure tests or use SKIP_TESTS=1 to bypass"
+      fi
+    else
+      print_color "$BLUE" "⚡ Running quick tests (use RUN_ALL_TESTS=1 for full suite)"
+      if npm run test:quick 2>/dev/null || npm run test 2>/dev/null; then
+        print_color "$GREEN" "✅ Tests passed"
+      else
+        print_color "$YELLOW" "⚠️  Tests failed or not configured"
+        print_color "$BLUE" "💡 Configure tests or use SKIP_TESTS=1 to bypass"
+      fi
+    fi
+  else
+    print_color "$YELLOW" "⚡ Skipping tests (no test/src files changed)"
+    print_color "$BLUE" "💡 Use RUN_ALL_TESTS=1 to force running all tests"
+  fi
+else
+  print_color "$YELLOW" "⚡ Skipping tests (no test scripts configured)"
+  print_color "$BLUE" "💡 Add test scripts to package.json when ready"
+fi
+
+# Security check for sensitive files
+printf "\n"
+print_color "$BLUE" "🔐 Security check..."
+sensitive_files=$(git diff --name-only "HEAD~${commits_ahead}" HEAD | grep -E '\.(env|key|pem|p12|pfx|secret)$|id_rsa|id_ed25519' || true)
+if [ -n "$sensitive_files" ]; then
+  print_color "$RED" "🚨 Warning: Sensitive files detected in commits:"
+  printf "%s\n" "$sensitive_files"
+  print_color "$YELLOW" "❓ Are you sure you want to push these files? (y/N)"
+  read -r response
+  case "$response" in
+    [yY][eE][sS]|[yY])
+      print_color "$GREEN" "✅ Continuing with push..."
+      ;;
+    *)
+      print_color "$RED" "❌ Push cancelled by user"
+      print_color "$BLUE" "💡 Consider adding these files to .gitignore"
+      exit 1
+      ;;
+  esac
+fi
+
+# Final validation check
+printf "\n"
+print_color "$BLUE" "🔍 Final validation..."
+if npm run validate:config 2>/dev/null; then
+  print_color "$GREEN" "✅ Configuration files are valid"
+else
+  print_color "$YELLOW" "⚠️  Configuration validation skipped (optional)"
+fi
+
+printf "\n"
+print_color "$GREEN" "✅ All pre-push checks passed!"
+print_color "$BLUE" "🚀 Safe to push to $branch"
+
+# Performance hint
+if [ "$commits_ahead" -gt 10 ]; then
+  printf "\n"
+  print_color "$YELLOW" "💡 Consider squashing commits ($commits_ahead commits ahead)"
+fi

@@ -1,5 +1,9 @@
-import { ProjectGenerator } from "@/components/ProjectGenerator";
+import VisualProjectEditor from '@/components/VisualProjectEditor/index';
 
-export default function NestJSGenerator() {
-  return <ProjectGenerator />;
+export default function Home() {
+  return (
+    <>
+      <VisualProjectEditor />
+    </>
+  );
 }

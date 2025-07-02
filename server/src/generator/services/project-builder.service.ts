@@ -4,113 +4,72 @@ import * as path from 'path';
 import * as archiver from 'archiver';
 import { promisify } from 'util';
 import { exec } from 'child_process';
+import { HandlebarsTemplateService } from './handlebars-template.service';
+import { PendingPartial, PartialFileMeta } from '../types/generation.types';
+import { DependencyResolverService } from './dependency-resolver.service';
+import {
+  FeatureNotFoundError,
+  FileSystemError,
+  TemplateError,
+} from '../../common/errors/generation.errors';
 
-interface PartialFileMeta {
-  target: string;
-  source: string;
-  placeholders: string[];
-  onlyIfFeatures: string[];
+interface FeatureConfig {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  copyFiles?: Array<{ source: string; target: string; processTemplate?: boolean }>;
+  updateAppModule?: boolean;
+  partialFiles?: Record<string, PartialFileMeta>;
 }
 
 const execAsync = promisify(exec);
 
 @Injectable()
 export class ProjectBuilderService {
-  private featureLocationCache: Record<
-    string,
-    'shared' | 'monolith' | 'microservice'
-  > = {};
-
   private readonly logger = new Logger(ProjectBuilderService.name);
   private readonly templatesPath = path.join(process.cwd(), 'templates');
-  private readonly featuresPath = path.join(this.templatesPath, 'features');
 
-  public async copyStarterTemplate(
-    source: string,
-    destination: string,
-  ): Promise<void> {
+  constructor(
+    private readonly templateService: HandlebarsTemplateService,
+    private readonly dependencyResolver: DependencyResolverService,
+  ) {}
+
+  public async copyStarterTemplate(source: string, destination: string): Promise<void> {
     await this.copyDirectory(source, destination);
   }
 
-  public async updatePackageJson(
-    projectPath: string,
-    projectName: string,
-  ): Promise<void> {
+  public async updatePackageJson(projectPath: string, projectName: string): Promise<void> {
     const pkgPath = path.join(projectPath, 'package.json');
-    const pkg = JSON.parse(await fs.promises.readFile(pkgPath, 'utf8'));
+    const pkg = JSON.parse(await fs.promises.readFile(pkgPath, 'utf8')) as Record<string, unknown>;
     pkg.name = projectName;
     await fs.promises.writeFile(pkgPath, JSON.stringify(pkg, null, 2));
   }
 
-  //   public async applyFeature(
-  //     tempDir: string,
-  //     feature: string,
-  //     config: any,
-  //     appliedFeatures: Set<string>,
-  //     pendingPartials: any[],
-  //     architecture: 'monolith' | 'microservice',
-  //   ) {
-  //     const parts = feature.split(':');
-  //     let cumulativePath = '';
-  //     let relativePath = '';
-
-  //     for (let i = 0; i < parts.length; i++) {
-  //       const part = parts[i];
-  //       cumulativePath = cumulativePath ? `${cumulativePath}:${part}` : part;
-  //       relativePath = path.join(relativePath, part);
-  //       console.log('cumulativePath', cumulativePath);
-  //       if (!appliedFeatures.has(cumulativePath)) {
-  //         // const fullFeaturePath = path.join(this.featuresPath, relativePath);
-  //         const fullFeaturePath = await this.resolveFeaturePath(
-  //           cumulativePath,
-  //           architecture,
-  //         );
-  //         console.log('fullFeaturePath', fullFeaturePath);
-
-  //         await this.applyFeatureConfig(
-  //           tempDir,
-  //           cumulativePath,
-  //           fullFeaturePath,
-  //           config,
-  //           appliedFeatures,
-  //           pendingPartials,
-  //           architecture,
-  //         );
-
-  //         appliedFeatures.add(cumulativePath);
-  //       }
-  //     }
-  //   }
-
   public async applyFeature(
     tempDir: string,
     feature: string,
-    config: any,
+    allFeatures: string[],
+    config: Record<string, unknown>,
     appliedFeatures: Set<string>,
-    pendingPartials: any[],
+    pendingPartials: PendingPartial[],
     architecture: 'monolith' | 'microservice',
   ): Promise<void> {
     const featureParts = feature.split(':');
     let cumulativeFeature = '';
 
     for (const part of featureParts) {
-      cumulativeFeature = cumulativeFeature
-        ? `${cumulativeFeature}:${part}`
-        : part;
+      cumulativeFeature = cumulativeFeature ? `${cumulativeFeature}:${part}` : part;
 
       if (appliedFeatures.has(cumulativeFeature)) {
         continue;
       }
 
-      const fullFeaturePath = await this.resolveFeaturePath(
-        cumulativeFeature,
-        architecture,
-      );
+      const fullFeaturePath = await this.resolveFeaturePath(cumulativeFeature, architecture);
 
       await this.applyFeatureConfig(
         tempDir,
         cumulativeFeature,
         fullFeaturePath,
+        allFeatures,
         config,
         appliedFeatures,
         pendingPartials,
@@ -125,218 +84,97 @@ export class ProjectBuilderService {
     tempDir: string,
     featureName: string,
     featurePath: string,
-    config: any,
+    allFeatures: string[],
+    config: Record<string, unknown>,
     appliedFeatures: Set<string>,
-    pendingPartials: any[],
+    pendingPartials: PendingPartial[],
     architecture: 'monolith' | 'microservice',
   ): Promise<void> {
-    console.log('-> applyFeatureConfig');
+    const featureConfigPath = path.join(featurePath, 'feature.config.json');
 
-    const configPath = path.join(featurePath, 'feature.config.json');
+    if (!fs.existsSync(featureConfigPath)) {
+      this.logger.warn(`No feature config found for ${featureName} at ${featureConfigPath}`);
+      return;
+    }
 
-    if (!fs.existsSync(configPath)) return;
+    try {
+      const featureConfig = JSON.parse(
+        await fs.promises.readFile(featureConfigPath, 'utf8'),
+      ) as FeatureConfig;
 
-    const featureConfig = JSON.parse(
-      await fs.promises.readFile(configPath, 'utf8'),
-    );
+      this.logger.log(`Applying feature: ${featureName}`);
 
-    console.log('applying', featureName);
+      // Install dependencies
+      await this.mergeDependencies(tempDir, featureConfig);
 
-    // Install dependencies
-    await this.mergeDependencies(tempDir, featureConfig);
+      // Copy files
+      if (featureConfig.copyFiles) {
+        for (const file of featureConfig.copyFiles) {
+          const src = path.join(featurePath, file.source);
+          const dest = path.join(tempDir, file.target);
 
-    // Copy files
-    if (featureConfig.copyFiles) {
-      for (const file of featureConfig.copyFiles) {
-        const src = path.join(featurePath, file.source);
-        const dest = path.join(tempDir, file.target);
+          if (!fs.existsSync(src)) {
+            throw new FileSystemError(`Source file not found: ${file.source}`, src, {
+              featureName,
+              fileConfig: file,
+            });
+          }
 
-        await this.copyFile(src, dest);
+          if (file.processTemplate) {
+            try {
+              await this.templateService.processTemplateFile(
+                src,
+                dest,
+                allFeatures,
+                config[featureName] || config[featureName.split(':')[0]] || {},
+                featureName,
+                tempDir,
+              );
+            } catch (error) {
+              throw new TemplateError(`Failed to process template: ${file.source}`, src, {
+                featureName,
+                originalError: error.message,
+              });
+            }
+          } else {
+            await this.copyFile(src, dest);
+          }
+        }
       }
-    }
 
-    if (featureConfig.updateAppModule) {
-      this.updateAppModule(tempDir, featureName);
-    }
+      if (featureConfig.updateAppModule) {
+        await this.updateAppModule(tempDir, featureName);
+      }
 
-    // Defer partials
-    if (featureConfig.partialFiles) {
-      pendingPartials.push({
-        tempDir,
-        featurePath,
-        partialFiles: featureConfig.partialFiles,
-        featureName,
-        architecture,
-      });
+      // Defer partials
+      if (featureConfig.partialFiles) {
+        const featureConfigForPartials = (config[featureName] ||
+          config[featureName.split(':')[0]] ||
+          {}) as Record<string, unknown>;
+        pendingPartials.push({
+          tempDir,
+          featurePath,
+          partialFiles: featureConfig.partialFiles,
+          featureName,
+          architecture,
+          config: featureConfigForPartials,
+          allFeatures,
+        });
+      }
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new TemplateError(
+          `Invalid JSON in feature config: ${featureName}`,
+          featureConfigPath,
+          { originalError: error.message },
+        );
+      }
+      throw error;
     }
   }
 
-  // public async applyPendingPartials(
-  //   pendingPartials: any[],
-  //   appliedFeatures: Set<string>,
-  // ): Promise<void> {
-  //   for (const {
-  //     tempDir,
-  //     featurePath,
-  //     partialFiles,
-  //     featureName,
-  //     architecture,
-  //   } of pendingPartials) {
-  //     for (const [target, partialConfig] of Object.entries(partialFiles) as [
-  //       string,
-  //       PartialFileMeta,
-  //     ][]) {
-  //       if (partialConfig.onlyIfFeatures) {
-  //         const allPresent = partialConfig.onlyIfFeatures.every((reqFeature) =>
-  //           appliedFeatures.has(reqFeature),
-  //         );
-
-  //         if (!allPresent) {
-  //           console.log(
-  //             `[Generator] Skipped partial ${partialConfig.source} - missing required features: ${partialConfig.onlyIfFeatures.join(', ')}`,
-  //           );
-
-  //           continue;
-  //         }
-  //       }
-
-  //       const targetPath = path.join(tempDir, partialConfig.target);
-
-  //       if (!fs.existsSync(targetPath)) {
-  //         continue;
-  //       }
-
-  //       const partialFilePath = path.join(featurePath, partialConfig.source);
-
-  //       if (!fs.existsSync(partialFilePath)) {
-  //         continue;
-  //       }
-
-  //       const targetContent = await fs.promises.readFile(targetPath, 'utf-8');
-  //       const partialContent = await fs.promises.readFile(
-  //         partialFilePath,
-  //         'utf-8',
-  //       );
-
-  //       // Split partial content by placeholders
-  //       const partialSections = partialContent.split('// <!-- ');
-  //       let updatedContent = targetContent;
-
-  //       for (const section of partialSections.slice(1)) {
-  //         const [placeholder, content] = section.split(' -->');
-  //         console.log(placeholder)
-
-  //         if (partialConfig.placeholders.includes(placeholder)) {
-  //           const insertMarker = `// <!-- ${placeholder} -->`;
-  //           const existingContent =
-  //             updatedContent.split(insertMarker)[1]?.split('// <!-- ')[0] || '';
-  //           const newContent = content.trim();
-
-  //           // If there's existing content, append the new content
-  //           if (existingContent) {
-  //             updatedContent = updatedContent.replace(
-  //               insertMarker + existingContent,
-  //               insertMarker + '\n' + newContent + '\n' + existingContent,
-  //             );
-  //           } else {
-  //             // If no existing content, just add the new content
-  //             updatedContent = updatedContent.replace(
-  //               insertMarker,
-  //               insertMarker + '\n' + newContent,
-  //             );
-  //           }
-  //         }
-  //       }
-
-  //       await fs.promises.writeFile(targetPath, updatedContent);
-  //     }
-  //   }
-  // }
-
-  //   public async applyPendingPartials(
-  //     pendingPartials: any[],
-  //     appliedFeatures: Set<string>,
-  //   ): Promise<void> {
-  //     for (const {
-  //       tempDir,
-  //       featurePath,
-  //       partialFiles,
-  //       featureName,
-  //       architecture,
-  //     } of pendingPartials) {
-  //       for (const [_, partialConfig] of Object.entries(partialFiles) as [
-  //         string,
-  //         PartialFileMeta,
-  //       ][]) {
-  //         if (partialConfig.onlyIfFeatures) {
-  //           const allPresent = partialConfig.onlyIfFeatures.every((reqFeature) =>
-  //             appliedFeatures.has(reqFeature),
-  //           );
-
-  //           if (!allPresent) {
-  //             console.log(
-  //               `[Generator] Skipped partial ${partialConfig.source} - missing required features: ${partialConfig.onlyIfFeatures.join(', ')}`,
-  //             );
-  //             continue;
-  //           }
-  //         }
-
-  //         const targetPath = path.join(tempDir, partialConfig.target);
-  //         if (!fs.existsSync(targetPath)) continue;
-
-  //         const partialFilePath = path.join(featurePath, partialConfig.source);
-  //         if (!fs.existsSync(partialFilePath)) continue;
-
-  //         let targetContent = await fs.promises.readFile(targetPath, 'utf-8');
-  //         const partialContent = await fs.promises.readFile(
-  //           partialFilePath,
-  //           'utf-8',
-  //         );
-
-  //         for (const placeholder of partialConfig.placeholders) {
-  //           const marker = `// <!-- ${placeholder} -->`;
-
-  //           if (!partialContent.includes(marker)) {
-  //             console.warn(
-  //               `[Partial] Marker ${marker} not found in partial source.`,
-  //             );
-  //             continue;
-  //           }
-
-  //           const contentToInsert = this.extractSection(
-  //             partialContent,
-  //             placeholder,
-  //           );
-  // console.log('Matched:', this.extractSection(partialContent, 'SERVICE_METHODS'));
-  //           if (!contentToInsert) continue;
-
-  //           const existingSection = targetContent.includes(marker)
-  //             ? (targetContent.split(marker)[1]?.split('// <!--')[0] ?? '')
-  //             : '';
-
-  //           const insertion = existingSection
-  //             ? `${marker}\n${contentToInsert.trim()}\n${existingSection}`
-  //             : `${marker}\n${contentToInsert.trim()}`;
-
-  //           targetContent = targetContent.replace(marker, insertion);
-  //         }
-
-  //         await fs.promises.writeFile(targetPath, targetContent);
-  //       }
-  //     }
-  //   }
-
-  //   private extractSection(content: string, placeholder: string): string | null {
-  //     const regex = new RegExp(
-  //       `//\\s*<!--\\s*${placeholder}\\s*-->\\s*\\n?([\\s\\S]*?)(?=\\n?\\s*//\\s*<!--|$)`,
-  //       'm',
-  //     );
-  //     const match = content.match(regex);
-  //     return match?.[1]?.trim() ?? null;
-  //   }
-
   public async applyPendingPartials(
-    pendingPartials: any[],
+    pendingPartials: PendingPartial[],
     appliedFeatures: Set<string>,
   ): Promise<void> {
     for (const {
@@ -344,14 +182,12 @@ export class ProjectBuilderService {
       featurePath,
       partialFiles,
       featureName,
-      architecture,
+      config: featureConfig,
+      allFeatures,
     } of pendingPartials) {
-      for (const [_, partialConfig] of Object.entries(partialFiles) as [
-        string,
-        PartialFileMeta,
-      ][]) {
+      for (const [, partialConfig] of Object.entries(partialFiles)) {
         if (partialConfig.onlyIfFeatures) {
-          const allPresent = partialConfig.onlyIfFeatures.every((reqFeature) =>
+          const allPresent = partialConfig.onlyIfFeatures.every((reqFeature: string) =>
             appliedFeatures.has(reqFeature),
           );
           if (!allPresent) continue;
@@ -362,93 +198,32 @@ export class ProjectBuilderService {
         if (!fs.existsSync(targetPath) || !fs.existsSync(partialPath)) continue;
 
         let targetContent = await fs.promises.readFile(targetPath, 'utf-8');
-        const partialContent = await fs.promises.readFile(partialPath, 'utf-8');
+        let partialContent = await fs.promises.readFile(partialPath, 'utf-8');
+
+        // Process partial with Handlebars
+        partialContent = this.templateService.processTemplate(
+          partialContent,
+          allFeatures,
+          featureConfig,
+          featureName,
+          tempDir,
+        );
 
         for (let i = 0; i < partialConfig.placeholders.length; i++) {
           const current = partialConfig.placeholders[i];
           const next = partialConfig.placeholders[i + 1];
           const marker = `// <!-- ${current} -->`;
 
-          // console.log('===>', current, next);
-          const contentToInsert = this.extractFromTo(
-            partialContent,
-            current,
-            next,
-          );
-          // console.log(contentToInsert);
+          const contentToInsert = this.extractFromTo(partialContent, current, next);
           if (!contentToInsert) continue;
 
-          // console.log('contentToInsert', contentToInsert);
-
-          const existingSection = targetContent.includes(marker)
-            ? (targetContent.split(marker)[1]?.split('// <!--')[0] ?? '')
-            : '';
-
-          // console.log('existingSection', existingSection);
-          // console.log('marker', marker);
-
-          // const insertion = existingSection
-          //   ? `${marker}\n${contentToInsert.trim()}\n${existingSection}`
-          //   : `${marker}\n${contentToInsert.trim()}`;
-
           const insertion = `${marker}\n${contentToInsert.trim()}`;
-          // const insertion = `\n${contentToInsert.trim()}`;
-
           targetContent = targetContent.replace(marker, insertion);
         }
 
         await fs.promises.writeFile(targetPath, targetContent);
       }
     }
-  }
-
-  private extractFromTo(
-    content: string,
-    start: string,
-    end?: string,
-  ): string | null {
-    const startRegex = new RegExp(`//\\s*<!--\\s*${start}\\s*-->`, 'g');
-    const endRegex = end
-      ? new RegExp(`//\\s*<!--\\s*${end}\\s*-->`, 'g')
-      : null;
-
-    const startMatch = startRegex.exec(content);
-    if (!startMatch) return null;
-
-    const startIndex = startMatch.index + startMatch[0].length;
-
-    let endIndex = content.length;
-    if (endRegex) {
-      endRegex.lastIndex = startIndex;
-      const endMatch = endRegex.exec(content);
-      if (endMatch) {
-        endIndex = endMatch.index;
-      }
-    }
-
-    return content.slice(startIndex, endIndex).trim();
-  }
-
-  private async updateAppModule(tempDir: string, feature: string) {
-    console.log('updateAppModule');
-    const appModulePath = path.join(tempDir, 'src/app.module.ts');
-    const appModuleContent = await fs.promises.readFile(appModulePath, 'utf-8');
-
-    // Add import statement with correct path
-    const importStatement = `import { ${this.capitalizeFirstLetter(feature)}Module } from './${feature}/${feature}.module';`;
-    const updatedContent = appModuleContent.replace(
-      /import.*?;/,
-      `$&\n${importStatement}`,
-    );
-
-    // Add module to imports array
-    const moduleName = `${this.capitalizeFirstLetter(feature)}Module`;
-    const updatedImports = updatedContent.replace(
-      /@Module\({[\s\S]*?imports:\s*\[([\s\S]*?)\]/,
-      `@Module({\n  imports: [\n$1    ${moduleName},  ]`,
-    );
-
-    await fs.promises.writeFile(appModulePath, updatedImports);
   }
 
   public async finalizeProject(tempDir: string): Promise<Buffer> {
@@ -467,22 +242,78 @@ export class ProjectBuilderService {
     const archive = archiver('zip', { zlib: { level: 9 } });
 
     return new Promise((resolve, reject) => {
-      output.on('close', async () => {
-        const buffer = await fs.promises.readFile(zipPath);
-        resolve(buffer);
+      output.on('close', () => {
+        void (async () => {
+          try {
+            const buffer = await fs.promises.readFile(zipPath);
+            resolve(buffer);
+          } catch (error) {
+            reject(
+              new Error(
+                `Failed to read zip file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              ),
+            );
+          }
+        })();
       });
 
-      archive.on('error', reject);
+      archive.on('error', (err: Error) => reject(err));
 
       archive.pipe(output);
       archive.directory(directory, false);
-      archive.finalize();
+      void archive.finalize();
     });
   }
 
+  private extractFromTo(content: string, start: string, end?: string): string | null {
+    const startRegex = new RegExp(`//\\s*<!--\\s*${start}\\s*-->`, 'g');
+    const endRegex = end ? new RegExp(`//\\s*<!--\\s*${end}\\s*-->`, 'g') : null;
+
+    const startMatch = startRegex.exec(content);
+    if (!startMatch) return null;
+
+    const startIndex = startMatch.index + startMatch[0].length;
+
+    let endIndex = content.length;
+    if (endRegex) {
+      endRegex.lastIndex = startIndex;
+      const endMatch = endRegex.exec(content);
+      if (endMatch) {
+        endIndex = endMatch.index;
+      }
+    }
+
+    return content.slice(startIndex, endIndex).trim();
+  }
+
+  private async updateAppModule(tempDir: string, feature: string): Promise<void> {
+    console.log('updateAppModule');
+    const appModulePath = path.join(tempDir, 'src/app.module.ts');
+    const appModuleContent = await fs.promises.readFile(appModulePath, 'utf-8');
+
+    // Add import statement with correct path
+    const importStatement = `import { ${this.capitalizeFirstLetter(feature)}Module } from './${feature}/${feature}.module';`;
+    const updatedContent = appModuleContent.replace(/import.*?;/, `$&\n${importStatement}`);
+
+    // Add module to imports array
+    const moduleName = `${this.capitalizeFirstLetter(feature)}Module`;
+    const updatedImports = updatedContent.replace(
+      /@Module\({[\s\S]*?imports:\s*\[([\s\S]*?)\]/,
+      `@Module({\n  imports: [\n$1    ${moduleName},  ]`,
+    );
+
+    await fs.promises.writeFile(appModulePath, updatedImports);
+  }
+
   private async copyFile(src: string, dest: string): Promise<void> {
-    await fs.promises.mkdir(path.dirname(dest), { recursive: true });
-    await fs.promises.copyFile(src, dest);
+    try {
+      await fs.promises.mkdir(path.dirname(dest), { recursive: true });
+      await fs.promises.copyFile(src, dest);
+    } catch (error) {
+      throw new FileSystemError(`Failed to copy file from ${src} to ${dest}`, dest, {
+        originalError: error.message,
+      });
+    }
   }
 
   private async copyDirectory(src: string, dest: string): Promise<void> {
@@ -502,7 +333,7 @@ export class ProjectBuilderService {
   }
 
   private async removePlaceholderComments(dir: string): Promise<void> {
-    const fileExtensions = ['.ts', '.js', '.json', '.env']; // Adjust as needed
+    const fileExtensions = ['.ts', '.js', '.json', '.env'];
 
     const walk = async (dirPath: string): Promise<string[]> => {
       const entries = await fs.promises.readdir(dirPath, {
@@ -533,28 +364,32 @@ export class ProjectBuilderService {
     }
   }
 
-  private async mergeDependencies(tempDir: string, config: any): Promise<void> {
+  private async mergeDependencies(tempDir: string, config: FeatureConfig): Promise<void> {
     const pkgPath = path.join(tempDir, 'package.json');
-    const pkg = JSON.parse(await fs.promises.readFile(pkgPath, 'utf8'));
+    const pkg = JSON.parse(await fs.promises.readFile(pkgPath, 'utf8')) as Record<string, unknown>;
 
-    if (config.dependencies) {
+    const resolved = this.dependencyResolver.resolveDependencies(config);
+
+    if (Object.keys(resolved.dependencies).length > 0) {
+      const deps = (pkg.dependencies as Record<string, string>) || {};
       pkg.dependencies = {
-        ...pkg.dependencies,
-        ...config.dependencies,
+        ...deps,
+        ...resolved.dependencies,
       };
     }
 
-    if (config.devDependencies) {
+    if (Object.keys(resolved.devDependencies).length > 0) {
+      const devDeps = (pkg.devDependencies as Record<string, string>) || {};
       pkg.devDependencies = {
-        ...pkg.devDependencies,
-        ...config.devDependencies,
+        ...devDeps,
+        ...resolved.devDependencies,
       };
     }
 
     await fs.promises.writeFile(pkgPath, JSON.stringify(pkg, null, 2));
   }
 
-  private capitalizeFirstLetter(string: string) {
+  private capitalizeFirstLetter(string: string): string {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
@@ -565,12 +400,7 @@ export class ProjectBuilderService {
     const relativePath = path.join(...feature.split(':'));
 
     const sharedPath = path.join(this.templatesPath, 'shared', relativePath);
-    const archPath = path.join(
-      this.templatesPath,
-      architecture,
-      'modules',
-      relativePath,
-    );
+    const archPath = path.join(this.templatesPath, architecture, 'modules', relativePath);
 
     if (await this.pathExists(sharedPath)) {
       return sharedPath;
@@ -580,9 +410,7 @@ export class ProjectBuilderService {
       return archPath;
     }
 
-    throw new Error(
-      `Feature "${feature}" not found in shared or ${architecture} templates.`,
-    );
+    throw new FeatureNotFoundError(feature, architecture);
   }
 
   private async pathExists(p: string): Promise<boolean> {

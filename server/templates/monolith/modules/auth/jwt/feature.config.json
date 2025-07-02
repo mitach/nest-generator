@@ -1,61 +1,53 @@
 {
-  "dependencies": {
-    "@nestjs/jwt": "^11.0.0",
-    "passport-jwt": "^4.0.1"
-  },
-  "devDependencies": {
-    "@types/passport-jwt": "^4.0.1"
-  },
-  "requires": [
-    "auth"
-  ],
+  "dependencyPresets": ["basic-auth"],
+  "requires": ["auth"],
   "copyFiles": [
     {
-      "source": "jwt.strategy.ts",
-      "target": "src/auth/jwt/jwt.strategy.ts"
+      "source": "jwt.strategy.ts.hbs",
+      "target": "src/auth/strategies/jwt.strategy.ts"
     },
     {
-      "source": "jwt-auth.controller.ts",
-      "target": "src/auth/jwt/jwt-auth.controller.ts"
+      "source": "jwt-auth.controller.ts.hbs",
+      "target": "src/auth/controllers/jwt-auth.controller.ts",
+      "processTemplate": true
     },
     {
       "source": "jwt-auth.service.ts",
-      "target": "src/auth/jwt/jwt-auth.service.ts"
+      "target": "src/auth/services/jwt-auth.service.ts"
+    },
+    {
+      "source": "jwt-auth.guard.ts",
+      "target": "src/auth/guards/jwt-auth.guard.ts"
     },
     {
       "source": "jwt-payload.interface.ts",
-      "target": "src/auth/jwt/jwt-payload.interface.ts"
+      "target": "src/auth/interfaces/jwt-payload.interface.ts"
     },
     {
       "source": "refresh-token.guard.ts",
-      "target": "src/auth/jwt/refresh-token.guard.ts"
+      "target": "src/auth/guards/refresh-token.guard.ts"
     },
     {
-      "source": "dto/login.dto.ts",
-      "target": "src/auth/jwt/dto/login.dto.ts"
+      "source": "dto/login.dto.ts.hbs",
+      "target": "src/auth/dtos/login.dto.ts",
+      "processTemplate": true
     },
     {
-      "source": "dto/register.dto.ts",
-      "target": "src/auth/jwt/dto/register.dto.ts"
+      "source": "dto/register.dto.ts.hbs",
+      "target": "src/auth/dtos/register.dto.ts",
+      "processTemplate": true
     }
   ],
   "partialFiles": {
     ".env": {
       "target": ".env",
       "source": "partials/env.partial",
-      "placeholders": [
-        "AUTH_ENV"
-      ]
+      "placeholders": ["AUTH_ENV"]
     },
     "src/auth/auth.module.ts": {
       "target": "src/auth/auth.module.ts",
       "source": "partials/auth.module.partial",
-      "placeholders": [
-        "AUTH_IMPORTS",
-        "AUTH_MODULES",
-        "AUTH_PROVIDERS",
-        "AUTH_CONTROLLERS"
-      ]
+      "placeholders": ["AUTH_IMPORTS", "AUTH_MODULES", "AUTH_PROVIDERS", "AUTH_CONTROLLERS"]
     }
   }
 }

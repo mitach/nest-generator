@@ -1,0 +1,4 @@
+// <!-- USERS_SERVICE_METHODS -->
+async findAll(): Promise<User[]> {
+  return this.userRepo.find();
+}

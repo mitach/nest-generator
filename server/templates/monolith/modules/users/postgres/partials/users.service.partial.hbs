@@ -1,0 +1,30 @@
+// <!-- USER_IMPORTS -->
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+
+// <!-- USER_CONSTRUCTOR_ARGS -->
+@InjectRepository(User) private readonly userRepo: Repository<User>,
+
+// <!-- USERS_SERVICE_METHODS -->
+async findByEmail(email: string): Promise<any> {
+    return this.userRepo.findOne({ where: { email } });
+}
+
+async createUser(data: Partial<User>): Promise<any> {
+    return this.userRepo.save(data);
+}
+
+async findById(userId: string) {
+    return this.userRepo.findOne({
+        where: { id: userId },
+        relations: {
+            {{#if (includes allFeatures 'roles:postgres')}}
+                roles: true,
+            {{/if}}
+            {{#if (includes allFeatures 'permissions:postgres')}}
+                permissions: true,
+            {{/if}}
+        }
+    });
+}

@@ -1,0 +1,6 @@
+// <!-- IMPORTS -->
+import { Role } from '../../roles/schemas/role.schema';
+
+// <!-- PROPS -->
+@Prop({ type: [{ type: Types.ObjectId, ref: 'Role' }], default: [] })
+roles: Role[];

@@ -1,0 +1,28 @@
+{{#if (includes allFeatures 'validation')}}
+import { IsString, IsOptional } from 'class-validator';
+{{/if}}
+{{#if (includes allFeatures 'swagger')}}
+  import { ApiProperty } from '@nestjs/swagger';
+{{/if}}
+
+export class CreateRoleDto {
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiProperty({ example: 'admin' })
+  {{/if}}
+  {{#if (includes allFeatures 'validation')}}
+    @IsString()
+  {{/if}}
+  name: string;
+
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiProperty({
+      example: 'Administrator role with full access',
+      required: false,
+    })
+  {{/if}}
+  {{#if (includes allFeatures 'validation')}}
+    @IsString()
+    @IsOptional()
+  {{/if}}
+  description?: string;
+}

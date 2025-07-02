@@ -1,0 +1,32 @@
+{{#if (includes allFeatures 'validation')}}
+import { IsString, IsOptional } from 'class-validator';
+{{/if}}
+{{#if (includes allFeatures 'swagger')}}
+  import { ApiProperty } from '@nestjs/swagger';
+{{/if}}
+
+export class CreatePermissionDto {
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiProperty({
+      description: 'Unique name of the permission (usually in dot notation)',
+      example: 'users.manage',
+    })
+  {{/if}}
+  {{#if (includes allFeatures 'validation')}}
+    @IsString()
+  {{/if}}
+  name: string;
+
+  {{#if (includes allFeatures 'swagger')}}
+      @ApiProperty({
+        description: 'Optional human-readable description of what the permission allows',
+        example: 'Allows full management of user accounts',
+        required: false,
+      })
+  {{/if}}
+  {{#if (includes allFeatures 'validation')}}
+    @IsString()
+    @IsOptional()
+  {{/if}}
+  description?: string;
+}

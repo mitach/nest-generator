@@ -1,6 +1,0 @@
-// <!-- GENERATE_TOKENS_REGISTER -->
-roles: user.roles,
-// <!-- GENERATE_TOKENS_LOGIN -->
-roles: user.roles,
-// <!-- GENERATE_TOKENS_REFRESH -->
-roles: payload.roles,

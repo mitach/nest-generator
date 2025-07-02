@@ -1,0 +1,26 @@
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+// <!-- IMPORTS -->
+
+@Entity('users')
+export class User {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  {{#each userFields}}
+		{{#each validationDecorators}}
+			{{this}}
+		{{/each}}
+
+		@Column({{json propOptions}})
+		{{raw name}}{{#if optional}}?{{/if}}: {{raw type}};
+
+	{{ else }}
+		@Column({ unique: true })
+		email: string;
+
+		@Column({ nullable: true })
+		password?: string;
+    {{/each}}
+
+  // <!-- COLUMNS -->
+}

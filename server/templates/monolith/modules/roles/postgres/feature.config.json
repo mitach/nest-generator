@@ -1,0 +1,40 @@
+{
+  "dependencyPresets": ["postgres-setup"],
+  "copyFiles": [
+    {
+      "source": "entities/role.entity.ts",
+      "target": "src/roles/entities/role.entity.ts"
+    },
+    {
+      "source": "common/interfaces/request-with-user.interface.ts",
+      "target": "src/common/interfaces/request-with-user.interface.ts"
+    }
+  ],
+  "partialFiles": {
+    "user.entity.ts": {
+      "source": "partials/users/user.entity.partial",
+      "target": "src/users/entities/user.entity.ts",
+      "placeholders": ["IMPORTS", "COLUMNS"]
+    },
+    "users.controller.ts": {
+      "source": "partials/users/users.controller.ts.partial",
+      "target": "src/users/users.controller.ts",
+      "placeholders": ["USERS_CONTROLLER_IMPORTS", "USERS_CONTROLLER_METHODS"]
+    },
+    "users.service.ts": {
+      "source": "partials/users/users.service.ts.partial",
+      "target": "src/users/users.service.ts",
+      "placeholders": ["USERS_SERVICE_METHODS"]
+    },
+    "roles.module.ts": {
+      "source": "partials/roles.module.ts.partial",
+      "target": "src/roles/roles.module.ts",
+      "placeholders": ["ROLES_IMPORTS", "ROLES_MODULES"]
+    },
+    "roles.service.ts": {
+      "source": "partials/roles.service.ts.partial",
+      "target": "src/roles/roles.service.ts",
+      "placeholders": ["ROLES_IMPORTS", "ROLES_CONSTRUCTOR_ARGS", "ROLES_SERVICE_METHODS"]
+    }
+  }
+}

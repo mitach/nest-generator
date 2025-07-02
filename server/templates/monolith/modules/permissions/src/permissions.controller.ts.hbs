@@ -1,0 +1,107 @@
+import { Controller, Get, Post, Body, Param, Delete, UseGuards } from '@nestjs/common';
+{{#if (includes allFeatures 'swagger')}}
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+{{/if}}
+import { PermissionsService } from './permissions.service';
+import { CreatePermissionDto } from './dto/create-permission.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
+import { Permission } from '../common/enums/permissions.enum';
+import { Permissions } from '../common/decorators/permissions.decorator';
+
+{{#if (includes allFeatures 'swagger')}}
+@ApiTags('permissions')
+@ApiBearerAuth('access-token')
+{{/if}}
+@Controller('permissions')
+export class PermissionsController {
+  constructor(private readonly permissionsService: PermissionsService) {}
+
+  // ⚠️ ================================== WARNING ==================================
+  // ⚠️ DEVELOPMENT ONLY ENDPOINT - DELETE THIS BEFORE PRODUCTION DEPLOYMENT
+  // ⚠️ ================================== WARNING ==================================
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiOperation({
+      summary: '⚠️ Initialize default permissions (Development only)',
+      description: `**This endpoint is for development environments only.**
+                    \nInitializes the system with a predefined set of default permissions.
+                    \n⚠️ **Must be removed or disabled in production deployments.**`,
+    })
+    @ApiResponse({
+      status: 201,
+      description: 'Default permissions initialized successfully.',
+    })
+  {{/if}}
+  @Post('init-permissions')
+  async initializeForDevelopment() {
+      return this.permissionsService.initializeDefaultPermissions();
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(Permission.PERMISSIONS_CREATE)
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiOperation({
+      summary: 'Create a new permission',
+      description: 'Creates a new permission. Requires `PERMISSIONS_CREATE` permission and a valid access token.',
+    })
+    @ApiBody({
+      description: 'Payload to create a new permission',
+      type: CreatePermissionDto,
+      examples: {
+        manageUsers: {
+          summary: 'Manage users permission',
+          description: 'Grants the ability to create, update, or delete users.',
+          value: {
+            name: 'users.manage',
+            description: 'Full user management capabilities.',
+          },
+        },
+      },
+    })
+  {{/if}}
+  create(@Body() createPermissionDto: CreatePermissionDto) {
+    return this.permissionsService.create(createPermissionDto);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(Permission.PERMISSIONS_READ)
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiOperation({
+      summary: 'Get all permissions',
+      description: 'Returns all permissions. Requires `PERMISSIONS_READ` permission.',
+    })
+  {{/if}}
+  findAll() {
+    return this.permissionsService.findAll();
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(Permission.PERMISSIONS_READ)
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiOperation({
+      summary: 'Get a permission by ID',
+      description: 'Returns a single permission. Requires `PERMISSIONS_READ` permission.',
+    })
+    @ApiParam({ name: 'id', description: 'UUID of the permission to retrieve' })
+  {{/if}}
+  findOne(@Param('id') id: string) {
+    return this.permissionsService.findOne(id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(Permission.PERMISSIONS_DELETE)
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiOperation({
+      summary: 'Delete a permission by ID',
+      description: 'Deletes a permission. Requires `PERMISSIONS_DELETE` permission.',
+    })
+    @ApiParam({ name: 'id', description: 'UUID of the permission to delete' })
+  {{/if}}
+  remove(@Param('id') id: string) {
+    return this.permissionsService.remove(id);
+  }
+}

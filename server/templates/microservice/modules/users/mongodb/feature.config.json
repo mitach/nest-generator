@@ -1,4 +1,5 @@
 {
+  "dependencyPresets": ["mongodb-setup"],
   "copyFiles": [
     {
       "source": "user.schema.ts",
@@ -9,20 +10,12 @@
     "src/users/users.module.ts": {
       "target": "src/app.module.ts",
       "source": "partials/users.module.partial",
-      "placeholders": [
-        "MODULE_IMPORTS",
-        "MODULES"
-      ]
+      "placeholders": ["MODULE_IMPORTS", "MODULES"]
     },
     "src/users/users.service.ts": {
       "target": "src/app.service.ts",
       "source": "partials/users.service.partial",
-      "placeholders": [
-        "SERVICE_IMPORTS",
-        "SERVICE_CONSTRUCTOR_PROPS",
-        "USER_FIND",
-        "USER_CREATE"
-      ]
+      "placeholders": ["SERVICE_IMPORTS", "SERVICE_CONSTRUCTOR_PROPS", "USER_FIND", "USER_CREATE"]
     }
   }
 }

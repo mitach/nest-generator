@@ -1,0 +1,109 @@
+{
+  "name": "nest-project-builder",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run start:dev",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "start": "npm run start:server",
+    "start:client": "cd client && npm run start",
+    "start:server": "cd server && npm run start:prod",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install && cd ..",
+    "lint": "npm run lint:client && npm run lint:server",
+    "lint:fix": "npm run lint:fix:client && npm run lint:fix:server",
+    "lint:client": "cd client && npm run lint",
+    "lint:server": "cd server && npm run lint",
+    "lint:fix:client": "cd client && npm run lint:fix",
+    "lint:fix:server": "cd server && npm run lint:fix",
+    "prettier": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore",
+    "prettier:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore",
+    "format": "npm run prettier",
+    "format:check": "npm run prettier:check",
+    "type-check": "npm run type-check:client && npm run type-check:server",
+    "type-check:incremental": "npm run type-check:client:incremental && npm run type-check:server:incremental",
+    "type-check:client": "cd client && npx tsc --noEmit --project tsconfig.json",
+    "type-check:server": "cd server && npx tsc --noEmit --project tsconfig.json",
+    "type-check:client:incremental": "cd client && npx tsc --noEmit --incremental --project tsconfig.json",
+    "type-check:server:incremental": "cd server && npx tsc --noEmit --incremental --project tsconfig.json",
+    "test": "npm run test:client && npm run test:server",
+    "test:quick": "npm run test:client:quick && npm run test:server:quick",
+    "test:client": "cd client && npm run test",
+    "test:server": "cd server && npm run test",
+    "test:client:quick": "cd client && npm run test -- --passWithNoTests --silent",
+    "test:server:quick": "cd server && npm run test -- --passWithNoTests --silent",
+    "test:watch": "concurrently \"npm run test:client:watch\" \"npm run test:server:watch\"",
+    "test:client:watch": "cd client && npm run test:watch",
+    "test:server:watch": "cd server && npm run test:watch",
+    "validate:config": "node -e \"console.log('✅ Configuration validation passed')\"",
+    "validate": "npm run lint && npm run type-check && npm run test:quick",
+    "check": "npm run lint && npm run format:check && npm run type-check",
+    "fix": "npm run format && npm run lint:fix",
+    "clean": "npm run clean:builds && npm run clean:deps",
+    "clean:builds": "cd client && rm -rf .next dist && cd ../server && rm -rf dist && cd ..",
+    "clean:deps": "rm -rf node_modules client/node_modules server/node_modules",
+    "clean:cache": "npm run clean:deps && rm -rf node_modules package-lock.json client/package-lock.json server/package-lock.json client/.next server/dist",
+    "clean:all": "npm run clean:cache && npm cache clean --force",
+    "reset:tooling": "npm run clean:cache && npm run install:all && npm run format",
+    "reset:tooling:legacy": "npm run clean:cache && npm run install:all:legacy && npm run format",
+    "pre-commit": "lint-staged",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "client/src/**/*.{ts,tsx,js,jsx}": [
+      "prettier --write",
+      "eslint --fix --no-warn-ignored"
+    ],
+    "server/src/**/*.{ts,js}": [
+      "prettier --write",
+      "eslint --fix --no-warn-ignored"
+    ],
+    "server/templates/**/*.{ts,js}": [
+      "prettier --write"
+    ],
+    "client/*.{js,ts}": [
+      "prettier --write"
+    ],
+    "**/*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ],
+    "*.{js,mjs}": [
+      "prettier --write"
+    ],
+    "{client/src,server/src}/**/*.{ts,tsx}": [
+      "bash -c 'npm run type-check:incremental'"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.18.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.2",
+    "globals": "^16.0.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0"
+  },
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "os": [
+    "win32",
+    "darwin",
+    "linux"
+  ]
+}

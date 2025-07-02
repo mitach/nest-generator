@@ -1,0 +1,15 @@
+// <!-- IMPORTS -->
+import { ManyToMany, JoinTable } from 'typeorm';
+import { Permission } from '../../permissions/entities/permission.entity';
+
+// <!-- COLUMNS -->
+@ManyToMany(() => Permission, { eager: false })
+@JoinTable({
+    name: 'user_permissions',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: {
+        name: 'permission_id',
+        referencedColumnName: 'id',
+    },
+})
+permissions: Permission[];

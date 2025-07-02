@@ -1,7 +1,28 @@
 {
+  "customDependencies": {
+    "@nestjs/mapped-types": "^2.1.0"
+  },
   "updateAppModule": true,
   "copyFiles": [
-    { "source": "users.module.ts", "target": "src/users/users.module.ts" },
-    { "source": "users.service.ts", "target": "src/users/users.service.ts" }
+    {
+      "source": "users.module.ts",
+      "target": "src/users/users.module.ts"
+    },
+    {
+      "source": "users.controller.ts",
+      "target": "src/users/users.controller.ts"
+    },
+    {
+      "source": "users.service.ts",
+      "target": "src/users/users.service.ts"
+    },
+    {
+      "source": "dtos/create-user.dto.ts",
+      "target": "src/users/dto/create-user.dto.ts"
+    },
+    {
+      "source": "dtos/update-user.dto.ts",
+      "target": "src/users/dto/update-user.dto.ts"
+    }
   ]
 }

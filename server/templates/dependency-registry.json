@@ -1,0 +1,95 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2024-01-15"
+  },
+  "dependencies": {
+    "nestjs": {
+      "@nestjs/common": "^11.0.1",
+      "@nestjs/core": "^11.0.1",
+      "@nestjs/platform-express": "^11.0.1",
+      "@nestjs/config": "^4.0.2",
+      "@nestjs/microservices": "^11.1.3"
+    },
+    "auth": {
+      "@nestjs/passport": "^11.0.5",
+      "@nestjs/jwt": "^11.0.0",
+      "passport": "^0.7.0",
+      "passport-jwt": "^4.0.1",
+      "passport-google-oauth20": "^2.0.0",
+      "bcrypt": "^5.1.1"
+    },
+    "database": {
+      "@nestjs/mongoose": "^11.0.3",
+      "@nestjs/typeorm": "^11.0.0",
+      "mongoose": "^8.15.2",
+      "typeorm": "^0.3.22",
+      "pg": "^8.15.6"
+    },
+    "validation": {
+      "class-validator": "^0.14.1",
+      "class-transformer": "^0.5.1"
+    },
+    "docs": {
+      "@nestjs/swagger": "^11.1.6",
+      "swagger-ui-express": "^5.0.1"
+    },
+    "security": {
+      "helmet": "^8.1.0",
+      "express-rate-limit": "^7.1.5"
+    },
+    "performance": {
+      "compression": "^1.8.0"
+    }
+  },
+  "devDependencies": {
+    "auth": {
+      "@types/bcrypt": "^5.0.2",
+      "@types/passport-jwt": "^4.0.1",
+      "@types/passport-google-oauth20": "^2.0.16"
+    },
+    "database": {
+      "@types/pg": "^8.11.14"
+    },
+    "performance": {
+      "@types/compression": "^1.8.1"
+    }
+  },
+  "presets": {
+    "basic-auth": {
+      "includes": [
+        "auth.@nestjs/passport",
+        "auth.@nestjs/jwt",
+        "auth.passport",
+        "auth.passport-jwt",
+        "auth.bcrypt"
+      ],
+      "devIncludes": ["auth.@types/bcrypt", "auth.@types/passport-jwt"]
+    },
+    "google-auth": {
+      "extends": "basic-auth",
+      "includes": ["auth.passport-google-oauth20"],
+      "devIncludes": ["auth.@types/passport-google-oauth20"]
+    },
+    "mongodb-setup": {
+      "includes": ["database.@nestjs/mongoose", "database.mongoose"]
+    },
+    "postgres-setup": {
+      "includes": ["database.@nestjs/typeorm", "database.typeorm", "database.pg"],
+      "devIncludes": ["database.@types/pg"]
+    },
+    "validation-setup": {
+      "includes": ["validation.class-validator", "validation.class-transformer"]
+    },
+    "docs-setup": {
+      "includes": ["docs.@nestjs/swagger", "docs.swagger-ui-express"]
+    },
+    "security-setup": {
+      "includes": ["security.helmet", "security.express-rate-limit"]
+    },
+    "performance-setup": {
+      "includes": ["performance.compression"],
+      "devIncludes": ["performance.@types/compression"]
+    }
+  }
+}

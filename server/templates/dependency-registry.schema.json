@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Feature Configuration Schema",
+  "description": "Schema for feature.config.json files using centralized dependency management",
+  "type": "object",
+  "properties": {
+    "dependencyGroups": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["nestjs", "auth", "database", "validation", "docs", "security", "performance"]
+      },
+      "description": "Groups of related dependencies to include"
+    },
+    "dependencyPresets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "basic-auth",
+          "google-auth",
+          "mongodb-setup",
+          "postgres-setup",
+          "validation-setup",
+          "docs-setup",
+          "security-setup",
+          "performance-setup"
+        ]
+      },
+      "description": "Predefined combinations of dependencies"
+    },
+    "customDependencies": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9@/_-]+$": {
+          "type": "string",
+          "pattern": "^[\\^~]?\\d+\\.\\d+\\.\\d+.*$"
+        }
+      },
+      "description": "Additional dependencies not in registry"
+    },
+    "customDevDependencies": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9@/_-]+$": {
+          "type": "string",
+          "pattern": "^[\\^~]?\\d+\\.\\d+\\.\\d+.*$"
+        }
+      },
+      "description": "Additional dev dependencies not in registry"
+    },
+    "requires": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Other features this feature depends on"
+    },
+    "copyFiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source": { "type": "string" },
+          "target": { "type": "string" },
+          "processTemplate": { "type": "boolean", "default": false }
+        },
+        "required": ["source", "target"],
+        "additionalProperties": false
+      },
+      "description": "Files to copy during feature application"
+    },
+    "partialFiles": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "properties": {
+            "target": { "type": "string" },
+            "source": { "type": "string" },
+            "placeholders": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "onlyIfFeatures": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "required": ["target", "source", "placeholders"],
+          "additionalProperties": false
+        }
+      },
+      "description": "Partial file modifications"
+    },
+    "updateAppModule": {
+      "type": "boolean",
+      "description": "Whether to update app.module.ts"
+    }
+  },
+  "additionalProperties": false
+}

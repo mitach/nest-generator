@@ -1,0 +1,70 @@
+// <!-- ROLES_IMPORTS -->
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Role } from './entities/role.entity';
+
+// <!-- ROLES_CONSTRUCTOR_ARGS -->
+@InjectRepository(Role) private readonly roleRepo: Repository<Role>,
+
+// <!-- ROLES_SERVICE_METHODS -->
+// ⚠️ ================================== WARNING ==================================
+// ⚠️ DEVELOPMENT ONLY METHOD - DELETE THIS BEFORE PRODUCTION DEPLOYMENT
+// ⚠️ ================================== WARNING ==================================
+async initializeDefaultRoles(): Promise<{ message: string }> {
+const defaultRoles = [
+    { name: 'admin', description: 'Administrator with full access' },
+];
+
+for (const roleData of defaultRoles) {
+    const existingRole = await this.roleRepo.findOne({
+    where: { name: roleData.name.toLowerCase() },
+    });
+    
+    if (!existingRole) {
+    await this.create(roleData);
+    }
+}
+
+return { message: 'Successfully initialized roles' };
+}
+
+async create(createRoleDto: CreateRoleDto): Promise<Role> {
+const existingRole = await this.roleRepo.findOne({
+    where: { name: createRoleDto.name.toLowerCase() },
+});
+
+if (existingRole) {
+    throw new ConflictException('Role with this name already exists');
+}
+
+const role = this.roleRepo.create({
+    ...createRoleDto,
+    name: createRoleDto.name.toLowerCase(),
+});
+
+return this.roleRepo.save(role);
+}
+
+async findAll(): Promise<Role[]> {
+return this.roleRepo.find();
+}
+
+async findOne(id: string): Promise<Role> {
+const role = await this.roleRepo.findOne({
+    where: { id },
+});
+
+if (!role) {
+    throw new NotFoundException('Role not found');
+}
+
+return role;
+}
+
+async remove(id: string): Promise<void> {
+const result = await this.roleRepo.delete(id);
+
+if (result.affected === 0) {
+    throw new NotFoundException('Role not found');
+}
+}

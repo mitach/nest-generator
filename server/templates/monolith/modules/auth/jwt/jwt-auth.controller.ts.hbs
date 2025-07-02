@@ -1,0 +1,60 @@
+import { Body, Controller, Post } from '@nestjs/common';
+{{#if (includes allFeatures 'swagger')}}
+  import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+{{/if}}
+
+import { LoginDto } from '../dtos/login.dto';
+import { RegisterDto } from '../dtos/register.dto';
+import { JwtAuthService } from '../services/jwt-auth.service';
+
+{{#if (includes allFeatures 'swagger')}}
+  @ApiTags('jwt-auth')
+{{/if}}
+@Controller('auth')
+export class JwtAuthController {
+  constructor(private readonly jwtAuthService: JwtAuthService) { }
+
+  @Post('register')
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiOperation({ summary: 'Register a new user' })
+    @ApiBody({
+      type: RegisterDto,
+      description: 'User registration credentials',
+    })
+  {{/if}}
+  async register(@Body() registerDto: RegisterDto) {
+    return this.jwtAuthService.register(registerDto);
+  }
+
+  @Post('login')
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiOperation({ summary: 'Login a user' })
+    @ApiBody({
+        type: LoginDto,
+        description: 'User login credentials',
+    })
+  {{/if}}
+  async login(@Body() loginDto: LoginDto) {
+    return this.jwtAuthService.login(loginDto);
+  }
+
+  @Post('refresh')
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiBody({
+      description: 'Payload with refresh token',
+      schema: {
+        type: 'object',
+        properties: {
+          refreshToken: {
+            type: 'string',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+          },
+        },
+        required: ['refreshToken'],
+      },
+    })
+  {{/if}}
+  async refresh(@Body() body: { refreshToken: string }) {
+    return this.jwtAuthService.refresh(body.refreshToken);
+  }
+}

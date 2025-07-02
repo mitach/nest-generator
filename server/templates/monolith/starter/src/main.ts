@@ -1,12 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-// <!-- IMPORTS_PLACEHOLDER -->
+import { setupApp } from './setupApp';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule);
 
-  // <!-- MIDDLEWARE_PLACEHOLDER -->
+    setupApp(app);
 
-  await app.listen(process.env.PORT ?? 8080);
+    await app.listen(process.env.PORT ?? 8080);
 }
+
 bootstrap();

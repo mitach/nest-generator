@@ -1,28 +1,22 @@
 {
+  "dependencyPresets": ["postgres-setup"],
   "copyFiles": [
     {
-      "source": "user.entity.ts",
-      "target": "src/users/entities/user.entity.ts"
+      "source": "user.entity.ts.hbs",
+      "target": "src/users/entities/user.entity.ts",
+      "processTemplate": true
     }
   ],
   "partialFiles": {
     "src/users/users.module.ts": {
       "target": "src/users/users.module.ts",
       "source": "partials/users.module.partial",
-      "placeholders": [
-        "USER_IMPORTS",
-        "USER_MODULES"
-      ]
+      "placeholders": ["USER_IMPORTS", "USER_MODULES"]
     },
     "src/users/users.service.ts": {
       "target": "src/users/users.service.ts",
-      "source": "partials/users.service.partial",
-      "placeholders": [
-        "USER_IMPORTS",
-        "USER_CONSTRUCTOR_ARGS",
-        "USER_FIND",
-        "USER_CREATE"
-      ]
+      "source": "partials/users.service.partial.hbs",
+      "placeholders": ["USER_IMPORTS", "USER_CONSTRUCTOR_ARGS", "USERS_SERVICE_METHODS"]
     }
   }
 }

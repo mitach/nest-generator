@@ -1,0 +1,36 @@
+// <!-- IMPORTS_PLACEHOLDER -->
+import rateLimit from 'express-rate-limit';
+
+// <!-- MIDDLEWARE_PLACEHOLDER -->
+const limiter = rateLimit({
+{{#if rateLimitOptions.windowMs}}
+  windowMs: {{rateLimitOptions.windowMs}},
+{{else}}
+  windowMs: 15 * 60 * 1000,
+{{/if}}
+{{#if rateLimitOptions.max}}
+  max: {{rateLimitOptions.max}},
+{{else}}
+  max: 100,
+{{/if}}
+{{#if rateLimitOptions.message}}
+  message: {{{quotedValue rateLimitOptions.message}}},
+{{else}}
+  message: 'Too many requests from this IP, please try again later.',
+{{/if}}
+{{#if (isDefined rateLimitOptions.standardHeaders)}}
+  standardHeaders: {{rateLimitOptions.standardHeaders}},
+{{else}}
+  standardHeaders: true,
+{{/if}}
+{{#if (isDefined rateLimitOptions.legacyHeaders)}}
+  legacyHeaders: {{rateLimitOptions.legacyHeaders}},
+{{else}}
+  legacyHeaders: false,
+{{/if}}
+{{#if rateLimitOptions.skipSuccessfulRequests}}
+  skipSuccessfulRequests: {{rateLimitOptions.skipSuccessfulRequests}},
+{{/if}}
+});
+
+app.use(limiter);

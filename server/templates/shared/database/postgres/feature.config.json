@@ -1,27 +1,15 @@
 {
-  "dependencies": {
-    "@nestjs/typeorm": "^11.0.0",
-    "typeorm": "^0.3.22",
-    "pg": "^8.15.6"
-  },
-  "devDependencies": {
-    "@types/pg": "^8.11.14"
-  },
+  "dependencyPresets": ["postgres-setup"],
   "partialFiles": {
     ".env": {
       "target": ".env",
       "source": "partials/env.partial",
-      "placeholders": [
-        "DB_ENV"
-      ]
+      "placeholders": ["DB_ENV"]
     },
     "src/database/database.module.ts": {
       "target": "src/database/database.module.ts",
       "source": "partials/database.module.partial",
-      "placeholders": [
-        "DB_MODULE_IMPORT",
-        "DB_MODULE"
-      ]
+      "placeholders": ["DB_MODULE_IMPORT", "DB_MODULE"]
     }
   }
 }

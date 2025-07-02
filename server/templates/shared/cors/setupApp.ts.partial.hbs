@@ -1,0 +1,17 @@
+// <!-- MIDDLEWARE_PLACEHOLDER -->
+app.enableCors({
+{{#each corsOptions}}
+  {{@key}}:
+  {{#if (isArray this)}}
+    [
+    {{#each this}}
+      '{{this}}'{{#unless @last}}, {{/unless}}
+    {{/each}}
+    ]
+  {{else}}
+    {{this}}
+  {{/if}},
+{{else}}
+  origin: '*', credentials: true
+{{/each}}
+});

@@ -1,0 +1,125 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
+{{#if (includes allFeatures 'swagger')}}
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+{{/if}}
+
+import { RolesService } from './roles.service';
+import { CreateRoleDto } from './dto/create-role.dto';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+{{#if (includes allFeatures 'swagger')}}
+@ApiTags('roles')
+@ApiBearerAuth('access-token')
+{{/if}}
+@Controller('roles')
+export class RolesController {
+  constructor(private readonly rolesService: RolesService) {}
+
+  // ⚠️ ================================== WARNING ==================================
+  // ⚠️ DEVELOPMENT ONLY ENDPOINT - DELETE THIS BEFORE PRODUCTION DEPLOYMENT
+  // ⚠️ ================================== WARNING ==================================
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiOperation({
+      summary: '⚠️ Initialize default roles (Development only)',
+      description: `**This endpoint is for development environments only.**
+                      \nInitializes a predefined set of default roles (e.g., admin, viewer, member).
+                      \n⚠️ **Must be removed or disabled in production deployments.**`,
+    })
+    @ApiResponse({
+      status: 201,
+      description: 'Default roles initialized successfully.',
+    })
+  {{/if}}
+  @Post('init-roles')
+  async initializeForDevelopment() {
+    return this.rolesService.initializeDefaultRoles();
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiOperation({
+      summary: 'Create a new role (Admin only)',
+      description:
+          'Creates a new user role. Requires admin privileges and a valid access token.',
+    })
+    @ApiBody({
+      description: 'Payload to create a new role',
+      type: CreateRoleDto,
+      examples: {
+          viewerRole: {
+              summary: 'Viewer role',
+              description: 'E.g. Grants viewer read-only access',
+              value: {
+                  name: 'viewer',
+                  description: 'Can view resources but cannot modify them',
+              },
+          },
+          basicRole: {
+              summary: 'Basic role',
+              description: 'E.g. Minimal role with only required name',
+              value: {
+                  name: 'member',
+              },
+          },
+      },
+    })
+  {{/if}}
+  create(@Body() createRoleDto: CreateRoleDto) {
+    return this.rolesService.create(createRoleDto);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiOperation({
+    summary: 'Get all roles (Admin only)',
+    description:
+      'Returns a list of all roles in the system. Requires admin privileges.',
+    })
+  {{/if}}
+  findAll() {
+    return this.rolesService.findAll();
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiOperation({
+    summary: 'Get role by ID (Admin only)',
+    description:
+      'Returns a single role by its unique ID. Requires admin privileges.',
+    })
+    @ApiParam({ name: 'id', description: 'UUID of the role to retrieve' })
+  {{/if}}
+  findOne(@Param('id') id: string) {
+    return this.rolesService.findOne(id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  {{#if (includes allFeatures 'swagger')}}
+    @ApiOperation({
+      summary: 'Delete role by ID (Admin only)',
+      description: 'Deletes a role using its ID. Only accessible by admins.',
+    })
+    @ApiParam({ name: 'id', description: 'UUID of the role to delete' })
+  {{/if}}
+  remove(@Param('id') id: string) {
+    return this.rolesService.remove(id);
+  }
+}

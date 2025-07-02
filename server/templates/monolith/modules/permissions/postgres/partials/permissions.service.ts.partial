@@ -1,0 +1,76 @@
+// <!-- PERMISSIONS_IMPORTS -->
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Permission } from './entities/permission.entity';
+
+// <!-- PERMISSIONS_CONSTRUCTOR_ARGS -->
+@InjectRepository(Permission)
+private readonly permissionRepo: Repository<Permission>,
+
+// <!-- PERMISSIONS_SERVICE_METHODS -->
+// ⚠️ ================================== WARNING ==================================
+// ⚠️ DEVELOPMENT ONLY METHOD - DELETE THIS BEFORE PRODUCTION DEPLOYMENT
+// ⚠️ ================================== WARNING ==================================
+async initializeDefaultPermissions(): Promise<{ message: string }> {
+    const defaultPermissions = [
+        { name: 'permissions:read', description: 'View permissions' },
+        { name: 'permissions:create', description: 'Create permissions' },
+        { name: 'permissions:update', description: 'Update permissions' },
+        { name: 'permissions:delete', description: 'Delete permissions' },
+    ];
+
+    for (const permissionData of defaultPermissions) {
+        const exists = await this.permissionRepo.findOne({
+            where: { name: permissionData.name },
+        });
+
+        if (!exists) {
+            await this.create(permissionData);
+        }
+    }
+
+    return { message: 'Successfully initialized permissions' };
+}
+
+async create(createPermissionDto: CreatePermissionDto): Promise<Permission> {
+    const exists = await this.permissionRepo.findOne({
+        where: { name: createPermissionDto.name },
+    });
+
+    if (exists) {
+        throw new ConflictException('Permission with this name already exists');
+    }
+
+    const permission = this.permissionRepo.create(createPermissionDto);
+    return this.permissionRepo.save(permission);
+}
+
+async findAll(): Promise<Permission[]> {
+    return this.permissionRepo.find();
+}
+
+async findOne(id: string): Promise<Permission> {
+    const permission = await this.permissionRepo.findOne({ where: { id } });
+    if (!permission) {
+        throw new NotFoundException('Permission not found');
+    }
+    return permission;
+}
+
+async findByName(name: string): Promise<Permission | null> {
+    return this.permissionRepo.findOne({ where: { name } });
+}
+
+async findByNames(names: string[]): Promise<Permission[]> {
+    return this.permissionRepo
+        .createQueryBuilder('permission')
+        .where('permission.name IN (:...names)', { names })
+        .getMany();
+}
+
+async remove(id: string): Promise<void> {
+    const result = await this.permissionRepo.delete(id);
+    if (result.affected === 0) {
+        throw new NotFoundException('Permission not found');
+    }
+}

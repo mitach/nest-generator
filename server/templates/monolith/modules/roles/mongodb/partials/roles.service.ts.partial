@@ -1,0 +1,64 @@
+// <!-- ROLES_IMPORTS -->
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Role, RoleDocument } from './schemas/role.schema';
+
+// <!-- ROLES_CONSTRUCTOR_ARGS -->
+@InjectModel(Role.name) private roleModel: Model<RoleDocument>
+
+// <!-- ROLES_SERVICE_METHODS -->
+// ⚠️ ================================== WARNING ==================================
+// ⚠️ DEVELOPMENT ONLY METHOD - DELETE THIS BEFORE PRODUCTION DEPLOYMENT
+// ⚠️ ================================== WARNING ==================================
+async initializeDefaultRoles(): Promise<{ message: string }> {
+const defaultRoles = [
+    { name: 'admin', description: 'Administrator with full access' },
+];
+
+for (const roleData of defaultRoles) {
+    const existingRole = await this.roleModel
+    .findOne({ name: roleData.name.toLowerCase() })
+    .exec();
+    if (!existingRole) {
+    await this.create(roleData);
+    }
+}
+
+return { message: 'Succesfully initialized roles' };
+}
+
+async create(createRoleDto: CreateRoleDto): Promise<Role> {
+const existingRole = await this.roleModel.findOne({
+    name: createRoleDto.name.toLowerCase(),
+});
+
+if (existingRole) {
+    throw new ConflictException('Role with this name already exists');
+}
+
+const role = new this.roleModel({
+    ...createRoleDto,
+    name: createRoleDto.name.toLowerCase(),
+});
+
+return role.save();
+}
+
+async findAll(): Promise<Role[]> {
+return this.roleModel.find().exec();
+}
+
+async findOne(id: string): Promise<Role> {
+const role = await this.roleModel.findById(id).exec();
+if (!role) {
+    throw new NotFoundException('Role not found');
+}
+return role;
+}
+
+async remove(id: string): Promise<void> {
+const result = await this.roleModel.findByIdAndDelete(id).exec();
+if (!result) {
+    throw new NotFoundException('Role not found');
+}
+}

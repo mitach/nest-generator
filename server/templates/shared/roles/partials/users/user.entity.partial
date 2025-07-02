@@ -1,3 +1,0 @@
-// <!-- COLUMNS -->
-@Column('simple-array', { default: 'user' })
-roles: string[];

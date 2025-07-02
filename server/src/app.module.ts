@@ -9,9 +9,9 @@ import { FeaturesModule } from './features/features.module';
       isGlobal: true,
     }),
     GeneratorModule,
-    FeaturesModule
+    FeaturesModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

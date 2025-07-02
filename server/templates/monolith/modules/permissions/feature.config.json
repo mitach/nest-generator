@@ -1,0 +1,29 @@
+{
+  "updateAppModule": true,
+  "copyFiles": [
+    {
+      "source": "src/permissions.controller.ts.hbs",
+      "target": "src/permissions/permissions.controller.ts",
+      "processTemplate": true
+    },
+    { "source": "src/permissions.service.ts", "target": "src/permissions/permissions.service.ts" },
+    { "source": "src/permissions.module.ts", "target": "src/permissions/permissions.module.ts" },
+    {
+      "source": "src/dto/create-permission.dto.ts.hbs",
+      "target": "src/permissions/dto/create-permission.dto.ts",
+      "processTemplate": true
+    },
+    {
+      "source": "common/enums/permissions.enum.ts",
+      "target": "src/common/enums/permissions.enum.ts"
+    },
+    {
+      "source": "common/guards/permissions.guard.ts",
+      "target": "src/common/guards/permissions.guard.ts"
+    },
+    {
+      "source": "common/decorators/permissions.decorator.ts",
+      "target": "src/common/decorators/permissions.decorator.ts"
+    }
+  ]
+}

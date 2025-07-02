@@ -1,0 +1,45 @@
+{
+  "dependencyPresets": ["mongodb-setup"],
+  "copyFiles": [
+    {
+      "source": "schemas/role.schema.ts",
+      "target": "src/roles/schemas/role.schema.ts"
+    },
+    {
+      "source": "common/interfaces/request-with-user.interface.ts",
+      "target": "src/common/interfaces/request-with-user.interface.ts"
+    }
+  ],
+  "partialFiles": {
+    "user.schema.ts": {
+      "source": "partials/users/user.schema.partial",
+      "target": "src/users/schemas/user.schema.ts",
+      "placeholders": ["IMPORTS", "PROPS"]
+    },
+    "create-user.dto.ts": {
+      "source": "partials/users/create-user.dto.ts.partial",
+      "target": "src/users/dto/create-user.dto.ts",
+      "placeholders": ["USER_DTO_IMPORTS", "USER_DTO_PROPS"]
+    },
+    "users.controller.ts": {
+      "source": "partials/users/users.controller.ts.partial",
+      "target": "src/users/users.controller.ts",
+      "placeholders": ["USERS_CONTROLLER_IMPORTS", "USERS_CONTROLLER_METHODS"]
+    },
+    "users.service.ts": {
+      "source": "partials/users/users.service.ts.partial.hbs",
+      "target": "src/users/users.service.ts",
+      "placeholders": ["USER_IMPORTS", "USERS_SERVICE_METHODS"]
+    },
+    "roles.module.ts": {
+      "source": "partials/roles.module.ts.partial",
+      "target": "src/roles/roles.module.ts",
+      "placeholders": ["ROLES_IMPORTS", "ROLES_MODULES"]
+    },
+    "roles.service.ts": {
+      "source": "partials/roles.service.ts.partial",
+      "target": "src/roles/roles.service.ts",
+      "placeholders": ["ROLES_IMPORTS", "ROLES_CONSTRUCTOR_ARGS", "ROLES_SERVICE_METHODS"]
+    }
+  }
+}

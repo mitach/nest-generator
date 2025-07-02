@@ -1,0 +1,31 @@
+{
+  "updateAppModule": true,
+  "copyFiles": [
+    {
+      "source": "roles.module.ts",
+      "target": "src/roles/roles.module.ts"
+    },
+    {
+      "source": "roles.controller.ts.hbs",
+      "target": "src/roles/roles.controller.ts",
+      "processTemplate": true
+    },
+    {
+      "source": "roles.service.ts",
+      "target": "src/roles/roles.service.ts"
+    },
+    {
+      "source": "dto/create-role.dto.ts.hbs",
+      "target": "src/roles/dto/create-role.dto.ts",
+      "processTemplate": true
+    },
+    {
+      "source": "common/decorators/roles.decorator.ts",
+      "target": "src/common/decorators/roles.decorator.ts"
+    },
+    {
+      "source": "common/guards/roles.guard.ts",
+      "target": "src/common/guards/roles.guard.ts"
+    }
+  ]
+}

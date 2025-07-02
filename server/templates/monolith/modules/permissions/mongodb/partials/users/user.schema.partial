@@ -1,0 +1,6 @@
+// <!-- IMPORTS -->
+import { Permission } from '../../permissions/schemas/permission.schema';
+
+// <!-- PROPS -->
+@Prop({ type: [{ type: Types.ObjectId, ref: 'Permission' }], default: [] })
+permissions: Types.ObjectId[] | Permission[];

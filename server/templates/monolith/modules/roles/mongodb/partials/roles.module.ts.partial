@@ -1,0 +1,6 @@
+// <!-- ROLES_IMPORTS -->
+import { MongooseModule } from '@nestjs/mongoose';
+import { Role, RoleSchema } from './schemas/role.schema';
+
+// <!-- ROLES_MODULES -->
+MongooseModule.forFeature([{ name: Role.name, schema: RoleSchema }]),

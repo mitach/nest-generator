@@ -1,0 +1,10 @@
+{
+  "dependencyGroups": ["security"],
+  "partialFiles": {
+    "main.ts": {
+      "source": "setupApp.ts.partial.hbs",
+      "target": "src/setupApp.ts",
+      "placeholders": ["IMPORTS_PLACEHOLDER", "MIDDLEWARE_PLACEHOLDER"]
+    }
+  }
+}

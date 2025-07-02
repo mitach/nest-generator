@@ -1,0 +1,31 @@
+{{#if (includes allFeatures 'validation')}}
+import { IsEmail, IsString, MinLength } from 'class-validator';
+{{/if}}
+{{#if (includes allFeatures 'swagger')}}
+import { ApiProperty } from '@nestjs/swagger';
+{{/if}}
+
+export class RegisterDto {
+    {{#if (includes allFeatures 'swagger')}}
+        @ApiProperty({
+            description: 'User email address for registration',
+            example: 'newuser@example.com',
+        })
+    {{/if}}
+    {{#if (includes allFeatures 'validation')}}
+        @IsEmail()
+    {{/if}}
+    email: string;
+
+    {{#if (includes allFeatures 'swagger')}}
+        @ApiProperty({
+            description: 'Password for the new account (minimum 6 characters)',
+            example: 'newSecurePassword456',
+        })
+    {{/if}}
+    {{#if (includes allFeatures 'validation')}}
+        @IsString()
+        @MinLength(6)
+    {{/if}}
+    password: string;
+}

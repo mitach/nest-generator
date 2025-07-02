@@ -1,0 +1,24 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+printf "Validating commit message...\n"
+
+# Validate commit message with commitlint
+npx commitlint --edit "$1"
+
+if [ $? -eq 0 ]; then
+  printf "✅ Commit message is valid!\n"
+else
+  printf "Commit message validation failed!\n"
+  printf "Please follow the conventional commit format:\n"
+  printf "   <type>(<scope>): <description>\n"
+  printf "\n"
+  printf "Examples:\n"
+  printf "   feat(client): add user authentication modal\n"
+  printf "   fix(server): resolve database connection issue\n"
+  printf "   docs: update README with setup instructions\n"
+  printf "\n"
+  printf "Available types: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert, wip\n"
+  printf "Available scopes: client, server, shared, templates, generator, auth, users, database, config, ui, api, deps, docs, ci, monolith, microservice\n"
+  exit 1
+fi

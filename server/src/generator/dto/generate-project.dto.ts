@@ -1,4 +1,12 @@
-import { IsString, IsArray, IsObject, IsOptional, IsIn, ValidateNested, MinLength } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  IsObject,
+  IsOptional,
+  IsIn,
+  ValidateNested,
+  MinLength,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class DatabaseConfig {
@@ -50,4 +58,4 @@ export class GenerateProjectDto {
     database?: DatabaseConfig;
     auth?: AuthConfig;
   };
-} 
+}

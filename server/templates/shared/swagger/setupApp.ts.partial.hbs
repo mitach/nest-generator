@@ -1,0 +1,49 @@
+// <!-- IMPORTS_PLACEHOLDER -->
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+// <!-- MIDDLEWARE_PLACEHOLDER -->
+const config = new DocumentBuilder()
+{{#if swaggerOptions.title}}
+  .setTitle({{{quotedValue swaggerOptions.title}}})
+{{else}}
+  .setTitle('My API')
+{{/if}}
+{{#if swaggerOptions.description}}
+  .setDescription({{{quotedValue swaggerOptions.description}}})
+{{else}}
+  .setDescription('API documentation')
+{{/if}}
+{{#if swaggerOptions.version}}
+  .setVersion({{{quotedValue swaggerOptions.version}}})
+{{else}}
+  .setVersion('1.0')
+{{/if}}
+{{#if swaggerOptions.servers}}
+    {{#each swaggerOptions.servers}}
+        .addServer(
+            {{{quotedValue this.url}}}
+            {{#if this.description}},
+                {{{quotedValue this.description}}}
+            {{/if}})
+    {{/each}}
+{{/if}}
+{{#if swaggerOptions.addBearerAuth}}
+  .addBearerAuth(
+    {
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+      name: 'Authorization',
+      in: 'header',
+    },
+    'access-token'
+  )
+{{/if}}
+.build();
+
+const document = SwaggerModule.createDocument(app, config);
+{{#if swaggerOptions.path}}
+    SwaggerModule.setup({{{quotedValue swaggerOptions.path}}}, app, document);
+{{else}}
+    SwaggerModule.setup('api-docs', app, document);
+{{/if}}
